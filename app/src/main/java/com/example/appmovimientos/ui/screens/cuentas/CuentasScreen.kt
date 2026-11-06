@@ -1,5 +1,7 @@
 package com.example.appmovimientos.ui.screens.cuentas
 
+import com.example.appmovimientos.data.preferences.dinero
+import com.example.appmovimientos.data.preferences.simboloMoneda
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -151,7 +153,7 @@ fun CuentasScreen(
                                         }
 
                                         Text(
-                                            "S/ %.2f".format(totalCuentasBalance),
+                                            dinero(totalCuentasBalance),
                                             color = Color.White,
                                             fontSize = 28.sp,
                                             fontWeight = FontWeight.ExtraBold
@@ -226,7 +228,7 @@ fun CuentasScreen(
                     OutlinedTextField(
                         value = nuevoSaldoInput,
                         onValueChange = { nuevoSaldoInput = it },
-                        label = { Text("Saldo (S/.)") },
+                        label = { Text("Saldo (${simboloMoneda()})") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp),
@@ -358,7 +360,7 @@ fun AdminAccountCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "S/ %.2f".format(account.balance),
+                    text = dinero(account.balance),
                     color = Color(0xFF10B981),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
@@ -533,7 +535,7 @@ fun NuevaCuentaScreen(
                         OutlinedTextField(
                             value = saldoInicial,
                             onValueChange = { saldoInicial = it },
-                            label = { Text("Saldo inicial (S/.)") },
+                            label = { Text("Saldo inicial (${simboloMoneda()})") },
                             leadingIcon = { Icon(Icons.Filled.Check, contentDescription = null) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             modifier = Modifier.fillMaxWidth(),

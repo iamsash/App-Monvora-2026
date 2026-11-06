@@ -1,5 +1,8 @@
 package com.example.appmovimientos.ui.screens.movimientos
 
+import com.example.appmovimientos.data.preferences.dinero
+import com.example.appmovimientos.data.preferences.simboloMoneda
+import com.example.appmovimientos.data.preferences.fechaVisible
 import android.app.DatePickerDialog
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -156,7 +159,7 @@ fun RegistroScreen(
                     OutlinedTextField(
                         value = monto,
                         onValueChange = { monto = it },
-                        label = { Text("Monto (S/.)") },
+                        label = { Text("Monto (${simboloMoneda()})") },
                         leadingIcon = { Icon(Icons.Filled.Check, contentDescription = null) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         modifier = Modifier.fillMaxWidth(),
@@ -252,7 +255,7 @@ fun RegistroScreen(
                                             Column {
                                                 Text(cuenta.name)
                                                 Text(
-                                                    "S/. ${String.format("%.2f", cuenta.balance)}",
+                                                    dinero(cuenta.balance),
                                                     fontSize = 12.sp,
                                                     color = Color.Gray
                                                 )
@@ -428,7 +431,7 @@ fun ListaScreen(
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    "S/. ${String.format("%.2f", balance)}",
+                                    dinero(balance),
                                     color = Color.White,
                                     fontSize = 38.sp,
                                     fontWeight = FontWeight.ExtraBold
@@ -479,10 +482,10 @@ fun ListaScreen(
             title = { Text("Gestionar Movimiento", fontWeight = FontWeight.Bold) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Monto: S/. ${expense.amount}")
+                    Text("Monto: ${dinero(MoneyUtils.montoDe(expense))}")
                     Text("Descripción: ${expense.description}")
                     Text("Tipo: ${expense.type}")
-                    Text("Fecha: ${expense.date}")
+                    Text("Fecha: ${fechaVisible(expense.date)}")
                 }
             },
             confirmButton = {
@@ -581,7 +584,7 @@ fun ExpenseCard(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "S/. ${expense.amount}",
+                    text = dinero(MoneyUtils.montoDe(expense)),
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
                     color = amountColor
@@ -592,7 +595,7 @@ fun ExpenseCard(
                     fontSize = 14.sp
                 )
                 Text(
-                    text = "${expense.date} • ${expense.type}",
+                    text = "${fechaVisible(expense.date)} • ${expense.type}",
                     color = Color(0xFF666666),
                     fontSize = 12.sp
                 )

@@ -1,5 +1,7 @@
 package com.example.appmovimientos.ui.screens.main
 
+import com.example.appmovimientos.data.preferences.dinero
+import com.example.appmovimientos.data.preferences.fechaVisible
 import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -291,7 +293,7 @@ fun MainScreen(
                                     Spacer(modifier = Modifier.height(4.dp))
 
                                     Text(
-                                        "S/ %.2f".format(balanceTotal),
+                                        dinero(balanceTotal),
                                         color = Color.White,
                                         fontSize = 32.sp,
                                         fontWeight = FontWeight.Bold
@@ -324,7 +326,7 @@ fun MainScreen(
                                                 Spacer(modifier = Modifier.width(10.dp))
                                                 Column {
                                                     Text("Ingresos", color = Color.White.copy(alpha = 0.8f), fontSize = 11.sp)
-                                                    Text("S/ %.2f".format(ingresoTotal), color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                                    Text(dinero(ingresoTotal), color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                                                 }
                                             }
                                         }
@@ -350,7 +352,7 @@ fun MainScreen(
                                                 Spacer(modifier = Modifier.width(10.dp))
                                                 Column {
                                                     Text("Gastos", color = Color.White.copy(alpha = 0.8f), fontSize = 11.sp)
-                                                    Text("S/ %.2f".format(gastoTotal), color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                                    Text(dinero(gastoTotal), color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                                                 }
                                             }
                                         }
@@ -450,7 +452,7 @@ fun MainScreen(
 
                                             Column(horizontalAlignment = Alignment.End) {
                                                 Text(
-                                                    "S/ %.2f".format(monto),
+                                                    dinero(monto),
                                                     fontSize = 14.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     color = Color(0xFFEF4444)
@@ -1124,7 +1126,7 @@ fun CuentaCardCompacta(
                 }
             }
             Text(
-                "S/ %.2f".format(cuenta.balance),
+                dinero(cuenta.balance),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF10B981)
@@ -1180,7 +1182,7 @@ fun MovimientoCardCompacto(
                     maxLines = 1
                 )
                 Text(
-                    "${cuenta?.name ?: "Cuenta"} • ${movimiento.date}",
+                    "${cuenta?.name ?: "Cuenta"} • ${fechaVisible(movimiento.date)}",
                     fontSize = 12.sp,
                     color = Color(0xFF94A3B8),
                     maxLines = 1
@@ -1188,7 +1190,7 @@ fun MovimientoCardCompacto(
             }
 
             Text(
-                "${if (movimiento.type == "Gasto") "-" else "+"}S/ ${movimiento.amount}",
+                "${if (movimiento.type == "Gasto") "-" else "+"}${dinero(MoneyUtils.montoDe(movimiento))}",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 color = if (movimiento.type == "Gasto") Color(0xFFEF4444) else Color(0xFF10B981)
@@ -1256,7 +1258,7 @@ fun CuentaCardDetallada(
                     fontSize = 12.sp
                 )
                 Text(
-                    "S/ %.2f".format(cuenta.balance),
+                    dinero(cuenta.balance),
                     color = Color.White,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
@@ -1275,7 +1277,7 @@ fun CuentaCardDetallada(
                             fontSize = 12.sp
                         )
                         Text(
-                            "S/ %.2f".format(gastoTotal),
+                            dinero(gastoTotal),
                             color = Color(0xFFFFB74D),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
@@ -1351,7 +1353,7 @@ fun MovimientoCard(
                     fontSize = 14.sp
                 )
                 Text(
-                    movimiento.date,
+                    fechaVisible(movimiento.date),
                     color = Color(0xFF94A3B8),
                     fontSize = 12.sp
                 )
@@ -1359,7 +1361,7 @@ fun MovimientoCard(
 
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    "${if (movimiento.type == "Gasto") "-" else "+"}S/ ${movimiento.amount}",
+                    "${if (movimiento.type == "Gasto") "-" else "+"}${dinero(MoneyUtils.montoDe(movimiento))}",
                     color = if (movimiento.type == "Gasto") Color(0xFFEF4444) else Color(0xFF10B981),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
@@ -1419,7 +1421,7 @@ fun MovimientosPorCuentaDialog(
             Column {
                 Text(cuenta.name, fontWeight = FontWeight.Bold)
                 Text(
-                    "Saldo: S/ %.2f".format(cuenta.balance),
+                    "Saldo: ${dinero(cuenta.balance)}",
                     fontSize = 14.sp,
                     color = Color.Gray
                 )
@@ -1447,7 +1449,7 @@ fun MovimientosPorCuentaDialog(
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("Ingresos", fontSize = 12.sp, color = Color.Gray)
                             Text(
-                                "S/ %.2f".format(ingresoTotal),
+                                dinero(ingresoTotal),
                                 color = Color(0xFF10B981),
                                 fontWeight = FontWeight.Bold
                             )
@@ -1455,7 +1457,7 @@ fun MovimientosPorCuentaDialog(
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("Gastos", fontSize = 12.sp, color = Color.Gray)
                             Text(
-                                "S/ %.2f".format(gastoTotal),
+                                dinero(gastoTotal),
                                 color = Color(0xFFEF4444),
                                 fontWeight = FontWeight.Bold
                             )
@@ -1509,13 +1511,13 @@ fun MovimientosPorCuentaDialog(
                                             color = Color(0xFF1E293B)
                                         )
                                         Text(
-                                            mov.date,
+                                            fechaVisible(mov.date),
                                             fontSize = 12.sp,
                                             color = Color(0xFF94A3B8)
                                         )
                                     }
                                     Text(
-                                        "${if (mov.type == "Gasto") "-" else "+"}S/ ${mov.amount}",
+                                        "${if (mov.type == "Gasto") "-" else "+"}${dinero(MoneyUtils.montoDe(mov))}",
                                         color = if (mov.type == "Gasto") Color(0xFFEF4444) else Color(0xFF10B981),
                                         fontWeight = FontWeight.Bold
                                     )

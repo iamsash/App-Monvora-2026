@@ -1,6 +1,7 @@
 package com.example.appmovimientos.utils
 
 import android.content.Context
+import com.example.appmovimientos.data.preferences.AppPreferences
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -16,6 +17,7 @@ object PdfReportGenerator {
         totalGastos: Double,
         categoryStats: List<Triple<String, Double, Double>>
     ): File? {
+        val simbolo = AppPreferences.getInstance(context).moneda
         return generatePdf(context, "Reporte_Gastos_Categoria_$periodo.pdf") { canvas, paint, titlePaint, subtitlePaint, bodyPaint ->
             var yPos = 50f
             
@@ -24,7 +26,7 @@ object PdfReportGenerator {
             yPos += 30f
             canvas.drawText("Período: $periodo", 40f, yPos, subtitlePaint)
             yPos += 20f
-            canvas.drawText("Total Gastos: S/ %.2f".format(totalGastos), 40f, yPos, subtitlePaint)
+            canvas.drawText("Total Gastos: $simbolo %.2f".format(totalGastos), 40f, yPos, subtitlePaint)
             yPos += 40f
 
             // Table Header
@@ -33,7 +35,7 @@ object PdfReportGenerator {
             paint.color = Color.WHITE
             paint.isFakeBoldText = true
             canvas.drawText("Categoría", 50f, yPos + 20f, paint)
-            canvas.drawText("Monto (S/)", 350f, yPos + 20f, paint)
+            canvas.drawText("Monto ($simbolo)", 350f, yPos + 20f, paint)
             canvas.drawText("%", 480f, yPos + 20f, paint)
             yPos += 35f
 
@@ -43,7 +45,7 @@ object PdfReportGenerator {
             for ((catName, monto, porcentaje) in categoryStats) {
                 if (yPos > 750f) break
                 canvas.drawText(catName, 50f, yPos, bodyPaint)
-                canvas.drawText("S/ %.2f".format(monto), 350f, yPos, bodyPaint)
+                canvas.drawText("$simbolo %.2f".format(monto), 350f, yPos, bodyPaint)
                 canvas.drawText("%.1f%%".format(porcentaje), 480f, yPos, bodyPaint)
                 yPos += 25f
             }
@@ -58,6 +60,7 @@ object PdfReportGenerator {
         promedioMensual: Double,
         mesStats: List<Any>
     ): File? {
+        val simbolo = AppPreferences.getInstance(context).moneda
         return generatePdf(context, "Reporte_Movimientos_Mes_$anio.pdf") { canvas, paint, titlePaint, subtitlePaint, bodyPaint ->
             var yPos = 50f
 
@@ -65,7 +68,7 @@ object PdfReportGenerator {
             yPos += 30f
             canvas.drawText("Año: $anio | Total Movimientos: $totalMovimientos", 40f, yPos, subtitlePaint)
             yPos += 20f
-            canvas.drawText("Total Anual: S/ %.2f | Promedio Mensual: S/ %.2f".format(totalAnual, promedioMensual), 40f, yPos, subtitlePaint)
+            canvas.drawText("Total Anual: $simbolo %.2f | Promedio Mensual: $simbolo %.2f".format(totalAnual, promedioMensual), 40f, yPos, subtitlePaint)
             yPos += 40f
 
             paint.color = Color.parseColor("#10B981")
@@ -74,7 +77,7 @@ object PdfReportGenerator {
             paint.isFakeBoldText = true
             canvas.drawText("Mes", 50f, yPos + 20f, paint)
             canvas.drawText("Movimientos", 250f, yPos + 20f, paint)
-            canvas.drawText("Monto (S/)", 380f, yPos + 20f, paint)
+            canvas.drawText("Monto ($simbolo)", 380f, yPos + 20f, paint)
             canvas.drawText("%", 480f, yPos + 20f, paint)
             yPos += 35f
 
@@ -96,14 +99,15 @@ object PdfReportGenerator {
         promedioMensual: Double,
         mesStats: List<Any>
     ): File? {
+        val simbolo = AppPreferences.getInstance(context).moneda
         return generatePdf(context, "Reporte_Total_Mensual_$anio.pdf") { canvas, paint, titlePaint, subtitlePaint, bodyPaint ->
             var yPos = 50f
 
             canvas.drawText("App Movimientos - Reporte Total Mensual", 40f, yPos, titlePaint)
             yPos += 30f
-            canvas.drawText("Año: $anio | Total Gastos: S/ %.2f".format(totalAnual), 40f, yPos, subtitlePaint)
+            canvas.drawText("Año: $anio | Total Gastos: $simbolo %.2f".format(totalAnual), 40f, yPos, subtitlePaint)
             yPos += 20f
-            canvas.drawText("Total Movimientos: $totalMovimientos | Promedio Mensual: S/ %.2f".format(promedioMensual), 40f, yPos, subtitlePaint)
+            canvas.drawText("Total Movimientos: $totalMovimientos | Promedio Mensual: $simbolo %.2f".format(promedioMensual), 40f, yPos, subtitlePaint)
             yPos += 40f
 
             paint.color = Color.parseColor("#8B5CF6")
@@ -111,7 +115,7 @@ object PdfReportGenerator {
             paint.color = Color.WHITE
             paint.isFakeBoldText = true
             canvas.drawText("Mes", 50f, yPos + 20f, paint)
-            canvas.drawText("Gasto (S/)", 350f, yPos + 20f, paint)
+            canvas.drawText("Gasto ($simbolo)", 350f, yPos + 20f, paint)
             canvas.drawText("%", 480f, yPos + 20f, paint)
             yPos += 35f
 

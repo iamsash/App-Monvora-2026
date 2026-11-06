@@ -1,5 +1,7 @@
 package com.example.appmovimientos.ui.screens.reportes
 
+import com.example.appmovimientos.data.preferences.AppPreferences
+import com.example.appmovimientos.data.preferences.dinero
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -288,7 +290,7 @@ fun ReporteCategoriaScreen(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text("Total Gastos", fontSize = 13.sp, color = Color(0xFF64748B), fontWeight = FontWeight.Medium)
                                     Spacer(modifier = Modifier.height(4.dp))
-                                    Text("S/ %.2f".format(totalGastos), fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1E293B))
+                                    Text(dinero(totalGastos), fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1E293B))
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null, tint = Color(0xFF10B981), modifier = Modifier.size(16.dp))
@@ -402,7 +404,7 @@ fun ReporteCategoriaScreen(
                                                     }
 
                                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                                        Text("S/ %.2f".format(stat.second), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = categoryColors[index % categoryColors.size])
+                                                        Text(dinero(stat.second), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = categoryColors[index % categoryColors.size])
                                                         Spacer(modifier = Modifier.width(12.dp))
                                                         Text("%.1f%%".format(stat.third), fontSize = 13.sp, color = Color(0xFF64748B), fontWeight = FontWeight.Medium)
                                                         Spacer(modifier = Modifier.width(4.dp))
@@ -662,7 +664,7 @@ fun ReporteMesScreen(
                                     text = { Text("Descargar PDF", color = Color.White) },
                                     onClick = {
                                         expandedExport = false
-                                        val statsList = mesStats.map { "${it.nombre}: ${it.count} movs, S/ ${it.monto} (${it.porcentaje}%)" }
+                                        val statsList = mesStats.map { "${it.nombre}: ${it.count} movs, ${MoneyUtils.formatear(it.monto, AppPreferences.getInstance(context).moneda)} (${"%.1f".format(it.porcentaje)}%)" }
                                         val file = PdfReportGenerator.generateMonthlyMovementsPdf(context, anioSeleccionado, totalAnual, totalMovimientos, promedioMensual, statsList)
                                         if (file != null) {
                                             ReportShareUtils.openPdfFile(context, file)
@@ -673,7 +675,7 @@ fun ReporteMesScreen(
                                     text = { Text("Enviar por WhatsApp", color = Color.White) },
                                     onClick = {
                                         expandedExport = false
-                                        val statsList = mesStats.map { "${it.nombre}: ${it.count} movs, S/ ${it.monto} (${it.porcentaje}%)" }
+                                        val statsList = mesStats.map { "${it.nombre}: ${it.count} movs, ${MoneyUtils.formatear(it.monto, AppPreferences.getInstance(context).moneda)} (${"%.1f".format(it.porcentaje)}%)" }
                                         val file = PdfReportGenerator.generateMonthlyMovementsPdf(context, anioSeleccionado, totalAnual, totalMovimientos, promedioMensual, statsList)
                                         if (file != null) {
                                             ReportShareUtils.sharePdfViaWhatsApp(context, file, "Movimientos por Mes ($anioSeleccionado)")
@@ -762,7 +764,7 @@ fun ReporteMesScreen(
                                         Column {
                                             Text("Total Movimientos ($anioSeleccionado)", color = Color.White.copy(alpha = 0.85f), fontSize = 13.sp, fontWeight = FontWeight.Medium)
                                             Spacer(modifier = Modifier.height(4.dp))
-                                            Text("S/ %.2f".format(totalAnual), color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
+                                            Text(dinero(totalAnual), color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
                                         }
                                         Box(
                                             modifier = Modifier
@@ -784,7 +786,7 @@ fun ReporteMesScreen(
                                         }
                                         Column {
                                             Text("Promedio Mensual", color = Color.White.copy(alpha = 0.7f), fontSize = 11.sp)
-                                            Text("S/ %.2f".format(promedioMensual), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                            Text(dinero(promedioMensual), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                                         }
                                     }
                                 }
@@ -868,7 +870,7 @@ fun ReporteMesScreen(
                                         }
                                     }
                                     Column(horizontalAlignment = Alignment.End) {
-                                        Text("S/ %.2f".format(stat.monto), color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                                        Text(dinero(stat.monto), color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                                         Text("%.1f%% del total".format(stat.porcentaje), color = Color(0xFF10B981), fontSize = 12.sp)
                                     }
                                 }
@@ -1005,7 +1007,7 @@ fun ReporteTotalScreen(
                                     text = { Text("Descargar PDF", color = Color.White) },
                                     onClick = {
                                         expandedExport = false
-                                        val statsList = mesStats.map { "${it.first}: S/ ${it.second} (${it.third}%)" }
+                                        val statsList = mesStats.map { "${it.first}: ${MoneyUtils.formatear(it.second, AppPreferences.getInstance(context).moneda)} (${"%.1f".format(it.third)}%)" }
                                         val file = PdfReportGenerator.generateTotalMonthlyPdf(context, anioSeleccionado, totalAnual, totalMovimientos, promedioMensual, statsList)
                                         if (file != null) {
                                             ReportShareUtils.openPdfFile(context, file)
@@ -1016,7 +1018,7 @@ fun ReporteTotalScreen(
                                     text = { Text("Enviar por WhatsApp", color = Color.White) },
                                     onClick = {
                                         expandedExport = false
-                                        val statsList = mesStats.map { "${it.first}: S/ ${it.second} (${it.third}%)" }
+                                        val statsList = mesStats.map { "${it.first}: ${MoneyUtils.formatear(it.second, AppPreferences.getInstance(context).moneda)} (${"%.1f".format(it.third)}%)" }
                                         val file = PdfReportGenerator.generateTotalMonthlyPdf(context, anioSeleccionado, totalAnual, totalMovimientos, promedioMensual, statsList)
                                         if (file != null) {
                                             ReportShareUtils.sharePdfViaWhatsApp(context, file, "Reporte Total Mensual ($anioSeleccionado)")
@@ -1105,7 +1107,7 @@ fun ReporteTotalScreen(
                                         Column {
                                             Text("Total Gastos", color = Color.White.copy(alpha = 0.85f), fontSize = 13.sp, fontWeight = FontWeight.Medium)
                                             Spacer(modifier = Modifier.height(4.dp))
-                                            Text("S/ %.2f".format(totalAnual), color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
+                                            Text(dinero(totalAnual), color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
                                             Spacer(modifier = Modifier.height(4.dp))
                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null, tint = Color(0xFF10B981), modifier = Modifier.size(16.dp))
@@ -1163,7 +1165,7 @@ fun ReporteTotalScreen(
                                                         Icon(Icons.Filled.DateRange, contentDescription = null, tint = Color.White, modifier = Modifier.size(12.dp))
                                                     }
                                                     Spacer(modifier = Modifier.width(6.dp))
-                                                    Text("S/ %.0f".format(promedioMensual), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                                    Text(dinero(promedioMensual, 0), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                                                 }
                                                 Spacer(modifier = Modifier.height(4.dp))
                                                 Text("Promedio", color = Color.White.copy(alpha = 0.7f), fontSize = 10.sp)
@@ -1184,7 +1186,7 @@ fun ReporteTotalScreen(
                                                         Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null, tint = Color.White, modifier = Modifier.size(12.dp))
                                                     }
                                                     Spacer(modifier = Modifier.width(4.dp))
-                                                    Text("S/ %.0f".format(mesMasAlto?.value ?: 0.0), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                                    Text(dinero(mesMasAlto?.value ?: 0.0, 0), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                                                 }
                                                 Spacer(modifier = Modifier.height(4.dp))
                                                 Text("Más alto ($mesMasAltoNombre)", color = Color.White.copy(alpha = 0.7f), fontSize = 9.sp, maxLines = 1)
@@ -1244,7 +1246,7 @@ fun ReporteTotalScreen(
                                                         shadowElevation = 4.dp
                                                     ) {
                                                         Text(
-                                                            "S/ %.0f".format(monto),
+                                                            dinero(monto, 0),
                                                             fontSize = 9.sp,
                                                             fontWeight = FontWeight.Bold,
                                                             color = Color(0xFFF43F5E),
@@ -1360,7 +1362,7 @@ fun ReporteTotalScreen(
                                                     }
 
                                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                                        Text("S/ %.2f".format(stat.second), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFFF43F5E))
+                                                        Text(dinero(stat.second), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFFF43F5E))
                                                         Spacer(modifier = Modifier.width(12.dp))
                                                         Text("%.1f%%".format(stat.third), fontSize = 13.sp, color = Color(0xFF64748B), fontWeight = FontWeight.Medium)
                                                         Spacer(modifier = Modifier.width(4.dp))

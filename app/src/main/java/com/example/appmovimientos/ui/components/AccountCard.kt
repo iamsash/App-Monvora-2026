@@ -1,5 +1,6 @@
 package com.example.appmovimientos.ui.components
 
+import com.example.appmovimientos.data.preferences.dinero
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -72,7 +73,7 @@ fun AccountCard(
                     fontSize = 14.sp
                 )
                 Text(
-                    text = "S/. ${String.format("%.2f", account.balance)}",  // ✅ CAMBIO
+                    text = dinero(account.balance),  // ✅ CAMBIO
                     color = Color(0xFF4CAF50),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold

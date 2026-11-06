@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appmovimientos.data.preferences.AppSettings
 import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,7 +31,7 @@ fun ConfiguracionScreen(
     var expandedMoneda by remember { mutableStateOf(false) }
     var expandedFecha by remember { mutableStateOf(false) }
 
-    val monedas = listOf("S/.", "$")
+    val monedas = listOf(AppSettings.MONEDA_PEN, AppSettings.MONEDA_USD)
     val formatosFecha = listOf("DD/MM/AAAA", "AAAA-MM-DD")
 
     Scaffold(
@@ -70,11 +71,13 @@ fun ConfiguracionScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("Modo oscuro", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF1E293B))
-                            Text("Ajusta la apariencia visual de la app", fontSize = 12.sp, color = Color(0xFF94A3B8))
+                            Text("Próximamente", fontSize = 12.sp, color = Color(0xFF94A3B8))
                         }
+                        // Deshabilitado hasta que las pantallas usen los colores del tema.
                         Switch(
-                            checked = uiState.modoOscuro,
-                            onCheckedChange = { viewModel.setModoOscuro(it) }
+                            checked = false,
+                            onCheckedChange = null,
+                            enabled = false
                         )
                     }
                 }
@@ -125,7 +128,7 @@ fun ConfiguracionScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("Moneda de visualización", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF1E293B))
-                            Text("S/ (PEN) o $ (USD)", fontSize = 12.sp, color = Color(0xFF94A3B8))
+                            Text("Símbolo de los montos: S/ (PEN) o $ (USD). No convierte montos.", fontSize = 12.sp, color = Color(0xFF94A3B8))
                         }
                         Box {
                             OutlinedButton(onClick = { expandedMoneda = true }) {
