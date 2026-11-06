@@ -1,5 +1,6 @@
 package com.example.appmovimientos.ui.screens.login
 
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -153,6 +154,21 @@ fun LoginScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    var mostrarRecuperar by remember { mutableStateOf(false) }
+
+    if (mostrarRecuperar) {
+        RecuperarContrasenaDialog(
+            correoInicial = uiState.correo.trim().takeIf { it.contains("@") } ?: "",
+            onEnviar = { correo, onTerminado ->
+                viewModel.recuperarContrasena(correo) { exito, mensaje ->
+                    onTerminado()
+                    Toast.makeText(context, mensaje, Toast.LENGTH_LONG).show()
+                    if (exito) mostrarRecuperar = false
+                }
+            },
+            onCerrar = { mostrarRecuperar = false }
+        )
+    }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -218,7 +234,15 @@ fun LoginScreen(
                         singleLine = true
                     )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    TextButton(
+                        onClick = { mostrarRecuperar = true },
+                        modifier = Modifier.align(Alignment.End),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
+                    ) {
+                        Text("¿Olvidaste tu contraseña?", fontSize = 13.sp, color = Color(0xFF6366F1), fontWeight = FontWeight.SemiBold)
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     // Botón Iniciar Sesión con degradado
                     Button(
@@ -325,4 +349,63 @@ fun LoginScreen(
             }
         }
     }
+}
+
+
+/** Diálogo para pedir el enlace de restablecimiento de contraseña. */
+@Composable
+private fun RecuperarContrasenaDialog(
+    correoInicial: String,
+    onEnviar: (correo: String, onTerminado: () -> Unit) -> Unit,
+    onCerrar: () -> Unit
+) {
+    var correo by remember { mutableStateOf(correoInicial) }
+    var enviando by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = { if (!enviando) onCerrar() },
+        title = { Text("Recuperar contraseña", fontWeight = FontWeight.Bold) },
+        text = {
+            Column {
+                Text(
+                    "Te enviaremos un enlace a tu correo para crear una nueva contraseña.",
+                    fontSize = 14.sp,
+                    color = Color(0xFF64748B)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = correo,
+                    onValueChange = { correo = it },
+                    label = { Text("Correo electrónico") },
+                    leadingIcon = { Icon(Icons.Filled.Email, contentDescription = null, tint = Color(0xFF6366F1)) },
+                    singleLine = true,
+                    enabled = !enviando,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp)
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    enviando = true
+                    onEnviar(correo) { enviando = false }
+                },
+                enabled = !enviando && correo.isNotBlank()
+            ) {
+                if (enviando) {
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                } else {
+                    Text("Enviar enlace")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCerrar, enabled = !enviando) {
+                Text("Cancelar")
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        containerColor = Color.White
+    )
 }

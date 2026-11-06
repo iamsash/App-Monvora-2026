@@ -10,6 +10,10 @@ import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appmovimientos.data.repository.AuthRepository
+import com.google.firebase.FirebaseNetworkException
+import com.google.firebase.FirebaseTooManyRequestsException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -169,5 +173,42 @@ class LoginViewModel(
                 _uiState.update { it.copy(isLoading = false, errorMessage = "Error [${e.javaClass.simpleName}]: ${e.message}") }
             }
         }
+    }
+
+    /**
+     * Envía el enlace para restablecer la contraseña. Por privacidad, el
+     * mensaje de éxito no revela si el correo está registrado o no.
+     */
+    fun recuperarContrasena(correo: String, onResultado: (exito: Boolean, mensaje: String) -> Unit) {
+        val correoLimpio = correo.trim()
+        if (correoLimpio.isBlank()) {
+            onResultado(false, "Ingresa tu correo electrónico")
+            return
+        }
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(correoLimpio).matches()) {
+            onResultado(false, "El correo no es válido")
+            return
+        }
+        viewModelScope.launch {
+            try {
+                authRepository.sendPasswordResetEmail(correoLimpio)
+                onResultado(true, MENSAJE_RECUPERACION_ENVIADA)
+            } catch (e: FirebaseAuthInvalidUserException) {
+                onResultado(true, MENSAJE_RECUPERACION_ENVIADA)
+            } catch (e: FirebaseAuthInvalidCredentialsException) {
+                onResultado(false, "El correo no es válido")
+            } catch (e: FirebaseTooManyRequestsException) {
+                onResultado(false, "Demasiados intentos. Espera unos minutos e inténtalo de nuevo.")
+            } catch (e: FirebaseNetworkException) {
+                onResultado(false, "Sin conexión. Revisa tu internet e inténtalo de nuevo.")
+            } catch (e: Exception) {
+                onResultado(false, "No se pudo enviar el correo. Inténtalo más tarde.")
+            }
+        }
+    }
+
+    companion object {
+        const val MENSAJE_RECUPERACION_ENVIADA =
+            "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña. Revisa también tu carpeta de spam."
     }
 }

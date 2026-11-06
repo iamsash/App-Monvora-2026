@@ -26,6 +26,11 @@ class AuthRepository {
         return auth.createUserWithEmailAndPassword(email, pass).await()
     }
 
+    /** Envía el correo de Firebase para restablecer la contraseña. */
+    suspend fun sendPasswordResetEmail(email: String) {
+        auth.sendPasswordResetEmail(email).await()
+    }
+
     suspend fun changePassword(currentPass: String, newPass: String) {
         val user = auth.currentUser ?: throw IllegalStateException("Usuario no autenticado")
         val email = user.email ?: throw IllegalStateException("Correo de usuario no disponible")
