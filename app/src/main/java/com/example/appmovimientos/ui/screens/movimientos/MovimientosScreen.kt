@@ -23,6 +23,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appmovimientos.utils.MoneyUtils
 import androidx.navigation.NavController
 import com.example.appmovimientos.data.model.Account
 import com.example.appmovimientos.data.model.Category
@@ -347,9 +348,9 @@ fun ListaScreen(
     val isLoading = uiState.isLoading
 
     val totalIngresos = movimientos.filter { it.type == "Ingreso" }
-        .sumOf { it.amount.toDoubleOrNull() ?: 0.0 }
+        .sumOf { MoneyUtils.montoDe(it) }
     val totalGastos = movimientos.filter { it.type == "Gasto" }
-        .sumOf { it.amount.toDoubleOrNull() ?: 0.0 }
+        .sumOf { MoneyUtils.montoDe(it) }
     val balance = totalIngresos - totalGastos
 
     Scaffold(

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appmovimientos.data.model.Account
 import com.example.appmovimientos.data.repository.AccountRepository
+import com.example.appmovimientos.utils.MoneyUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -65,9 +66,12 @@ class CuentasViewModel(
             saldoInicial.isBlank() -> {
                 onError("Por favor ingresa el saldo inicial")
             }
+            MoneyUtils.validarSaldo(saldoInicial) == null -> {
+                onError("Ingresa un saldo inicial válido (máximo 2 decimales)")
+            }
             else -> {
                 val bancoFinal = if (tipo == "Efectivo") "" else if (banco.isBlank()) "BCP" else banco
-                val saldo = saldoInicial.toDoubleOrNull() ?: 0.0
+                val saldo = MoneyUtils.validarSaldo(saldoInicial) ?: return
                 val account = Account(
                     name = nombre,
                     type = tipo,
@@ -92,9 +96,9 @@ class CuentasViewModel(
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
-        val saldo = nuevoSaldoStr.toDoubleOrNull()
+        val saldo = MoneyUtils.validarSaldo(nuevoSaldoStr)
         if (saldo == null) {
-            onError("Por favor ingresa un monto válido")
+            onError("Por favor ingresa un monto válido (máximo 2 decimales)")
             return
         }
         viewModelScope.launch {

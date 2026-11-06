@@ -6,6 +6,8 @@ import com.example.appmovimientos.data.model.Account
 import com.example.appmovimientos.data.model.Category
 import com.example.appmovimientos.data.model.Expense
 import com.example.appmovimientos.data.repository.MovementRepository
+import com.example.appmovimientos.utils.MoneyUtils
+import com.example.appmovimientos.utils.MovementFilters
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,7 +37,7 @@ class MovimientosViewModel(
         viewModelScope.launch {
             launch {
                 movementRepository.getMovimientosFlow().collect { movimientos ->
-                    _uiState.update { it.copy(movimientos = movimientos, isLoading = false) }
+                    _uiState.update { it.copy(movimientos = MovementFilters.ordenarPorFechaDesc(movimientos), isLoading = false) }
                 }
             }
             launch {
@@ -66,8 +68,14 @@ class MovimientosViewModel(
             return
         }
 
+        val montoValidado = MoneyUtils.validarMontoMovimiento(monto)
+        if (montoValidado == null) {
+            onError("Ingresa un monto válido mayor que 0 (máximo 2 decimales)")
+            return
+        }
+
         val expense = Expense(
-            amount = monto,
+            amount = MoneyUtils.normalizar(montoValidado),
             description = descripcion,
             categoryId = categoria?.id ?: "",
             accountId = cuenta.id,

@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appmovimientos.utils.MoneyUtils
 import androidx.navigation.NavHostController
 import com.example.appmovimientos.R
 import com.example.appmovimientos.data.model.Account
@@ -495,9 +496,7 @@ fun MainScreen(
                                 Spacer(modifier = Modifier.height(16.dp))
 
                                 val ultimos6Meses = gastosMensuales.toList()
-                                    .sortedByDescending { it.first }
-                                    .take(6)
-                                    .reversed()
+                                    .takeLast(6) // ya viene en orden cronológico
 
                                 if (ultimos6Meses.isNotEmpty()) {
                                     val maxGasto = ultimos6Meses.maxOfOrNull { it.second } ?: 1.0
@@ -1409,10 +1408,10 @@ fun MovimientosPorCuentaDialog(
 ) {
     val gastoTotal = movimientos
         .filter { it.type == "Gasto" }
-        .sumOf { it.amount.toDoubleOrNull() ?: 0.0 }
+        .sumOf { MoneyUtils.montoDe(it) }
     val ingresoTotal = movimientos
         .filter { it.type == "Ingreso" }
-        .sumOf { it.amount.toDoubleOrNull() ?: 0.0 }
+        .sumOf { MoneyUtils.montoDe(it) }
 
     AlertDialog(
         onDismissRequest = onDismiss,

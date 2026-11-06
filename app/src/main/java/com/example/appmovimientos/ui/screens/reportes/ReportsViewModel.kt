@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.example.appmovimientos.utils.MovementFilters
 import java.util.Calendar
 
 class ReportsViewModel(
@@ -81,32 +82,11 @@ class ReportsViewModel(
         _uiState.update { it.copy(sortOrderTotal = order) }
     }
 
+    /** Movimientos del periodo elegido, ordenados del más reciente al más antiguo. */
     fun getFilteredMovimientos(): List<Expense> {
-        val movimientos = _uiState.value.movimientos
-        val periodo = _uiState.value.selectedPeriod
-        val calendar = Calendar.getInstance()
-        return when (periodo) {
-            "Mes Actual" -> {
-                val mesActual = calendar.get(Calendar.MONTH) + 1
-                val anioActual = calendar.get(Calendar.YEAR)
-                movimientos.filter { mov ->
-                    try {
-                        val partes = mov.date.split("/")
-                        partes.size == 3 && partes[1].toInt() == mesActual && partes[2].toInt() == anioActual
-                    } catch (e: Exception) { false }
-                }
-            }
-            "Últimos 3 Meses" -> movimientos.take(100)
-            "Último Año" -> {
-                val anioActual = calendar.get(Calendar.YEAR)
-                movimientos.filter { mov ->
-                    try {
-                        val partes = mov.date.split("/")
-                        partes.size == 3 && partes[2].toInt() == anioActual
-                    } catch (e: Exception) { false }
-                }
-            }
-            else -> movimientos
-        }
+        val state = _uiState.value
+        return MovementFilters.ordenarPorFechaDesc(
+            MovementFilters.filtrarPorPeriodo(state.movimientos, state.selectedPeriod)
+        )
     }
 }

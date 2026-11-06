@@ -15,7 +15,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Calendar
+import com.example.appmovimientos.utils.MoneyUtils
+import com.example.appmovimientos.utils.MovementFilters
 
 class MainViewModel(
     private val accountRepository: AccountRepository = AccountRepository(),
@@ -57,26 +58,18 @@ class MainViewModel(
 
                     var gasto = 0.0
                     var ingreso = 0.0
-                    val gastosPorMes = mutableMapOf<String, Double>()
                     val gastosPorCategoria = mutableMapOf<String, Double>()
 
                     for (mov in movimientosList) {
-                        val monto = mov.amount.toDoubleOrNull() ?: 0.0
+                        val monto = MoneyUtils.montoDe(mov)
                         if (mov.type == "Gasto") {
                             gasto += monto
                             gastosPorCategoria[mov.categoryId] = (gastosPorCategoria[mov.categoryId] ?: 0.0) + monto
                         } else {
                             ingreso += monto
                         }
-
-                        try {
-                            val partes = mov.date.split("/")
-                            if (partes.size == 3 && mov.type == "Gasto") {
-                                val mesAnio = "${partes[1]}/${partes[2]}"
-                                gastosPorMes[mesAnio] = (gastosPorMes[mesAnio] ?: 0.0) + monto
-                            }
-                        } catch (e: Exception) {}
                     }
+                    val gastosPorMes = MovementFilters.gastosPorMes(movimientosList)
 
                     val categoriasMap = categoriasList.associateBy { it.id }
                     val topCategorias = gastosPorCategoria.toList()
@@ -84,7 +77,7 @@ class MainViewModel(
                         .take(5)
 
                     Triple(
-                        Triple(cuentas, categoriasMap, movimientosList.sortedByDescending { it.date }),
+                        Triple(cuentas, categoriasMap, MovementFilters.ordenarPorFechaDesc(movimientosList)),
                         Triple(balanceTotal, gasto, ingreso),
                         Pair(gastosPorMes, topCategorias)
                     )
@@ -135,32 +128,9 @@ class MainViewModel(
         onSuccess()
     }
 
+    /** Movimientos del periodo elegido, ya ordenados del más reciente al más antiguo. */
     fun getFilteredMovimientos(): List<Expense> {
-        val movimientos = _uiState.value.movimientos
-        val periodo = _uiState.value.periodoSeleccionado
-        val calendar = Calendar.getInstance()
-        return when (periodo) {
-            "Mes Actual" -> {
-                val mesActual = calendar.get(Calendar.MONTH) + 1
-                val anioActual = calendar.get(Calendar.YEAR)
-                movimientos.filter { mov ->
-                    try {
-                        val partes = mov.date.split("/")
-                        partes.size == 3 && partes[1].toInt() == mesActual && partes[2].toInt() == anioActual
-                    } catch (e: Exception) { false }
-                }
-            }
-            "Últimos 3 Meses" -> movimientos.take(100)
-            "Último Año" -> {
-                val anioActual = calendar.get(Calendar.YEAR)
-                movimientos.filter { mov ->
-                    try {
-                        val partes = mov.date.split("/")
-                        partes.size == 3 && partes[2].toInt() == anioActual
-                    } catch (e: Exception) { false }
-                }.take(200)
-            }
-            else -> movimientos.take(50)
-        }
+        val state = _uiState.value
+        return MovementFilters.filtrarPorPeriodo(state.movimientos, state.periodoSeleccionado)
     }
 }

@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appmovimientos.utils.MoneyUtils
 import androidx.navigation.NavController
 import com.example.appmovimientos.ui.components.AnimatedButton
 import com.example.appmovimientos.ui.theme.AppColors
@@ -130,7 +131,7 @@ fun ReporteCategoriaScreen(
 
     val gastosPorCategoria = mutableMapOf<String, Double>()
     for (mov in movimientosFiltrados) {
-        val monto = mov.amount.toDoubleOrNull() ?: 0.0
+        val monto = MoneyUtils.montoDe(mov)
         gastosPorCategoria[mov.categoryId] = (gastosPorCategoria[mov.categoryId] ?: 0.0) + monto
     }
 
@@ -579,7 +580,7 @@ fun ReporteMesScreen(
         } catch (e: Exception) { false }
     }
 
-    val totalAnual = movimientosAnio.sumOf { it.amount.toDoubleOrNull() ?: 0.0 }
+    val totalAnual = movimientosAnio.sumOf { MoneyUtils.montoDe(it) }
     val totalMovimientos = movimientosAnio.size
     val promedioMensual = if (totalAnual > 0) totalAnual / 12.0 else 0.0
 
@@ -595,7 +596,7 @@ fun ReporteMesScreen(
             val partes = mov.date.split("/")
             if (partes.size == 3) {
                 val mes = partes[1].toInt()
-                val monto = mov.amount.toDoubleOrNull() ?: 0.0
+                val monto = MoneyUtils.montoDe(mov)
                 if (mes in 1..12) {
                     movimientosPorMes[mes] = movimientosPorMes[mes]!! + monto
                     conteoPorMes[mes] = conteoPorMes[mes]!! + 1
@@ -924,7 +925,7 @@ fun ReporteTotalScreen(
         } catch (e: Exception) { false }
     }
 
-    val totalAnual = movimientosAnio.sumOf { it.amount.toDoubleOrNull() ?: 0.0 }
+    val totalAnual = movimientosAnio.sumOf { MoneyUtils.montoDe(it) }
     val totalMovimientos = movimientosAnio.size
     val promedioMensual = if (totalAnual > 0) totalAnual / 12.0 else 0.0
 
@@ -936,7 +937,7 @@ fun ReporteTotalScreen(
             val partes = mov.date.split("/")
             if (partes.size == 3) {
                 val mes = partes[1].toInt()
-                val monto = mov.amount.toDoubleOrNull() ?: 0.0
+                val monto = MoneyUtils.montoDe(mov)
                 if (mes in 1..12) {
                     gastosPorMes[mes] = gastosPorMes[mes]!! + monto
                 }
