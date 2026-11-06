@@ -267,7 +267,12 @@ fun CuentasScreen(
         AlertDialog(
             onDismissRequest = { showDeleteDialog = null },
             title = { Text("Eliminar Cuenta") },
-            text = { Text("¿Estás seguro de que deseas eliminar la cuenta '${account.name}'?") },
+            text = {
+                Text(
+                    "¿Estás seguro de que deseas eliminar la cuenta '${account.name}'?\n\n" +
+                        "Solo se pueden eliminar cuentas sin movimientos registrados."
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -277,7 +282,7 @@ fun CuentasScreen(
                                 Toast.makeText(context, "Cuenta eliminada", Toast.LENGTH_SHORT).show()
                             },
                             onError = { errorMsg ->
-                                Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
                             }
                         )
                         showDeleteDialog = null

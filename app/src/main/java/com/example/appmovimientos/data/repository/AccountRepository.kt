@@ -52,8 +52,28 @@ class AccountRepository {
         return accountId
     }
 
+    /** Cantidad de movimientos registrados en la cuenta. */
+    suspend fun countMovements(accountId: String): Int {
+        val uid = getUid() ?: throw IllegalStateException("Usuario no autenticado")
+        // Para que esta consulta sea eficiente, las reglas de Firebase deben
+        // declarar ".indexOn": ["accountId"] en users/$uid/movimientos.
+        val snapshot = database.child("users").child(uid).child("movimientos")
+            .orderByChild("accountId").equalTo(accountId)
+            .get().await()
+        return snapshot.childrenCount.toInt()
+    }
+
+    /**
+     * Elimina la cuenta solo si no tiene movimientos. Las cuentas con
+     * historial se conservan para mantener la trazabilidad de los datos.
+     *
+     * @throws CuentaConMovimientosException si la cuenta tiene movimientos.
+     */
     suspend fun deleteAccount(accountId: String) {
         val uid = getUid() ?: throw IllegalStateException("Usuario no autenticado")
+        if (accountId.isBlank()) throw IllegalArgumentException("ID de cuenta inválido")
+        val cantidad = countMovements(accountId)
+        if (cantidad > 0) throw CuentaConMovimientosException(cantidad)
         database.child("users").child(uid).child("cuentas").child(accountId).removeValue().await()
     }
 
@@ -63,3 +83,11 @@ class AccountRepository {
         database.child("users").child(uid).child("cuentas").child(account.id).setValue(account).await()
     }
 }
+
+class CuentaConMovimientosException(val cantidad: Int) : Exception(
+    if (cantidad == 1) {
+        "No se puede eliminar la cuenta porque tiene 1 movimiento registrado."
+    } else {
+        "No se puede eliminar la cuenta porque tiene $cantidad movimientos registrados."
+    }
+)
