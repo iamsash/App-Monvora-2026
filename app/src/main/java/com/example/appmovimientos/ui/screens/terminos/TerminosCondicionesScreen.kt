@@ -71,7 +71,7 @@ fun TerminosCondicionesScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                "Para crear tu cuenta en ECONOTE, es necesario que leas y aceptes nuestros términos y condiciones y nuestra política de privacidad.",
+                "Para crear tu cuenta en MONVORA, es necesario que leas y aceptes nuestros términos y condiciones y nuestra política de privacidad.",
                 fontSize = 14.sp,
                 color = Color(0xFF64748B),
                 textAlign = TextAlign.Center,

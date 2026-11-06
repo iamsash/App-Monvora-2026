@@ -40,7 +40,7 @@ fun PoliticaPrivacidadScreen(navController: NavController) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                "Política de Privacidad - ECONOTE",
+                "Política de Privacidad - MONVORA",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF1E293B)
@@ -55,7 +55,7 @@ fun PoliticaPrivacidadScreen(navController: NavController) {
 
             Text(
                 "1. Información que recopilamos\n" +
-                        "Recopilamos información personal que usted nos proporciona al registrarse en ECONOTE, como su nombre completo, correo electrónico, nombre de usuario y los datos financieros (cuentas, categorías y movimientos) que decida registrar en la aplicación.",
+                        "Recopilamos información personal que usted nos proporciona al registrarse en MONVORA, como su nombre completo, correo electrónico, nombre de usuario y los datos financieros (cuentas, categorías y movimientos) que decida registrar en la aplicación.",
                 fontSize = 14.sp,
                 color = Color(0xFF475569)
             )
@@ -83,7 +83,7 @@ fun PoliticaPrivacidadScreen(navController: NavController) {
 
             Text(
                 "5. Contacto\n" +
-                        "Si tiene alguna duda sobre esta política de privacidad, puede ponerse en contacto con el equipo de soporte de ECONOTE a través de la aplicación.",
+                        "Si tiene alguna duda sobre esta política de privacidad, puede ponerse en contacto con el equipo de soporte de MONVORA a través de la aplicación.",
                 fontSize = 14.sp,
                 color = Color(0xFF475569)
             )

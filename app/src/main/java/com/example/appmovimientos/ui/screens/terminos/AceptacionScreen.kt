@@ -74,7 +74,7 @@ fun AceptacionScreen(
                 )
 
                 Text(
-                    "Para finalizar el registro en ECONOTE, por favor marca las casillas para confirmar que has leído y aceptas nuestros términos y condiciones y nuestra política de privacidad.",
+                    "Para finalizar el registro en MONVORA, por favor marca las casillas para confirmar que has leído y aceptas nuestros términos y condiciones y nuestra política de privacidad.",
                     fontSize = 14.sp,
                     color = Color(0xFF64748B)
                 )

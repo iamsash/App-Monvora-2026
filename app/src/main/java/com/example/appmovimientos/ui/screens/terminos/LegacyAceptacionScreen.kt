@@ -62,7 +62,7 @@ fun LegacyAceptacionScreen(
                 )
 
                 Text(
-                    "Hemos actualizado nuestros términos y condiciones y nuestra política de privacidad. Para continuar usando ECONOTE, por favor lee y acepta las casillas correspondientes.",
+                    "Hemos actualizado nuestros términos y condiciones y nuestra política de privacidad. Para continuar usando MONVORA, por favor lee y acepta las casillas correspondientes.",
                     fontSize = 14.sp,
                     color = Color(0xFF64748B)
                 )

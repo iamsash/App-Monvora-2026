@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -14,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,6 +23,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.appmovimientos.ui.components.AnimatedButton
 import com.example.appmovimientos.ui.theme.AppColors
+import com.example.appmovimientos.utils.PdfReportGenerator
+import com.example.appmovimientos.utils.ReportShareUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -165,32 +169,79 @@ fun ReporteCategoriaScreen(
                     }
                 },
                 actions = {
-                    Surface(
-                        onClick = { expandedPeriodo = true },
-                        shape = RoundedCornerShape(20.dp),
-                        color = Color.White.copy(alpha = 0.2f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                    val context = LocalContext.current
+                    var expandedExport by remember { mutableStateOf(false) }
+
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Surface(
+                            onClick = { expandedExport = true },
+                            shape = RoundedCornerShape(20.dp),
+                            color = Color.White.copy(alpha = 0.2f)
                         ) {
-                            Icon(Icons.Filled.DateRange, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(uiState.selectedPeriod, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Medium)
-                            Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                        }
-                        DropdownMenu(
-                            expanded = expandedPeriodo,
-                            onDismissRequest = { expandedPeriodo = false }
-                        ) {
-                            listOf("Mes Actual", "Últimos 3 Meses", "Último Año", "Todo").forEach { periodo ->
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Filled.Share, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Exportar", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                                Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            }
+                            DropdownMenu(
+                                expanded = expandedExport,
+                                onDismissRequest = { expandedExport = false },
+                                modifier = Modifier.background(Color(0xFF1E103F))
+                            ) {
                                 DropdownMenuItem(
-                                    text = { Text(periodo) },
+                                    text = { Text("Descargar PDF", color = Color.White) },
                                     onClick = {
-                                        viewModel.setPeriod(periodo)
-                                        expandedPeriodo = false
+                                        expandedExport = false
+                                        val file = PdfReportGenerator.generateCategoryReportPdf(context, uiState.selectedPeriod, totalGastos, categoryStats)
+                                        if (file != null) {
+                                            ReportShareUtils.openPdfFile(context, file)
+                                        }
                                     }
                                 )
+                                DropdownMenuItem(
+                                    text = { Text("Enviar por WhatsApp", color = Color.White) },
+                                    onClick = {
+                                        expandedExport = false
+                                        val file = PdfReportGenerator.generateCategoryReportPdf(context, uiState.selectedPeriod, totalGastos, categoryStats)
+                                        if (file != null) {
+                                            ReportShareUtils.sharePdfViaWhatsApp(context, file, "Reporte por Categoría (${uiState.selectedPeriod})")
+                                        }
+                                    }
+                                )
+                            }
+                        }
+
+                        Surface(
+                            onClick = { expandedPeriodo = true },
+                            shape = RoundedCornerShape(20.dp),
+                            color = Color.White.copy(alpha = 0.2f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Filled.DateRange, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(uiState.selectedPeriod, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                                Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            }
+                            DropdownMenu(
+                                expanded = expandedPeriodo,
+                                onDismissRequest = { expandedPeriodo = false }
+                            ) {
+                                listOf("Mes Actual", "Últimos 3 Meses", "Último Año", "Todo").forEach { periodo ->
+                                    DropdownMenuItem(
+                                        text = { Text(periodo) },
+                                        onClick = {
+                                            viewModel.setPeriod(periodo)
+                                            expandedPeriodo = false
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
@@ -504,6 +555,8 @@ fun ReporteCategoriaScreen(
     }
 }
 
+data class MesStat(val nombre: String, val monto: Double, val count: Int, val porcentaje: Double)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReporteMesScreen(
@@ -511,24 +564,339 @@ fun ReporteMesScreen(
     viewModel: ReportsViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val movimientos = uiState.movimientos
+
+    var expandedAnio by remember { mutableStateOf(false) }
+    var expandedSort by remember { mutableStateOf(false) }
+
+    val aniosDisponibles = listOf("2024", "2025", "2026")
+    val anioSeleccionado = uiState.selectedYear
+
+    val movimientosAnio = movimientos.filter { mov ->
+        try {
+            val partes = mov.date.split("/")
+            if (partes.size == 3) partes[2] == anioSeleccionado else false
+        } catch (e: Exception) { false }
+    }
+
+    val totalAnual = movimientosAnio.sumOf { it.amount.toDoubleOrNull() ?: 0.0 }
+    val totalMovimientos = movimientosAnio.size
+    val promedioMensual = if (totalAnual > 0) totalAnual / 12.0 else 0.0
+
+    val movimientosPorMes = mutableMapOf<Int, Double>()
+    val conteoPorMes = mutableMapOf<Int, Int>()
+    for (i in 1..12) {
+        movimientosPorMes[i] = 0.0
+        conteoPorMes[i] = 0
+    }
+
+    for (mov in movimientosAnio) {
+        try {
+            val partes = mov.date.split("/")
+            if (partes.size == 3) {
+                val mes = partes[1].toInt()
+                val monto = mov.amount.toDoubleOrNull() ?: 0.0
+                if (mes in 1..12) {
+                    movimientosPorMes[mes] = movimientosPorMes[mes]!! + monto
+                    conteoPorMes[mes] = conteoPorMes[mes]!! + 1
+                }
+            }
+        } catch (e: Exception) {}
+    }
+
+    val nombresMeses = listOf("", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre")
+
+    val mesStats = (1..12).map { mes ->
+        val monto = movimientosPorMes[mes] ?: 0.0
+        val count = conteoPorMes[mes] ?: 0
+        val porcentaje = if (totalAnual > 0) (monto / totalAnual) * 100 else 0.0
+        MesStat(nombresMeses[mes], monto, count, porcentaje)
+    }.let { list ->
+        if (uiState.sortOrderTotal == "Mayor a menor") {
+            list.sortedByDescending { it.monto }
+        } else {
+            list.sortedBy { it.monto }
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Movimientos por Mes", fontWeight = FontWeight.Bold) },
+                title = {
+                    Column {
+                        Text("Movimientos por Mes", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 18.sp)
+                        Text("Desglose de tus movimientos mensuales", fontSize = 11.sp, color = Color.White.copy(alpha = 0.7f))
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = Color.White)
                     }
-                }
+                },
+                actions = {
+                    val context = LocalContext.current
+                    var expandedExport by remember { mutableStateOf(false) }
+
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Surface(
+                            onClick = { expandedExport = true },
+                            shape = RoundedCornerShape(20.dp),
+                            color = Color.White.copy(alpha = 0.2f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Filled.Share, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Exportar", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                                Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            }
+                            DropdownMenu(
+                                expanded = expandedExport,
+                                onDismissRequest = { expandedExport = false },
+                                modifier = Modifier.background(Color(0xFF1E103F))
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Descargar PDF", color = Color.White) },
+                                    onClick = {
+                                        expandedExport = false
+                                        val statsList = mesStats.map { "${it.nombre}: ${it.count} movs, S/ ${it.monto} (${it.porcentaje}%)" }
+                                        val file = PdfReportGenerator.generateMonthlyMovementsPdf(context, anioSeleccionado, totalAnual, totalMovimientos, promedioMensual, statsList)
+                                        if (file != null) {
+                                            ReportShareUtils.openPdfFile(context, file)
+                                        }
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Enviar por WhatsApp", color = Color.White) },
+                                    onClick = {
+                                        expandedExport = false
+                                        val statsList = mesStats.map { "${it.nombre}: ${it.count} movs, S/ ${it.monto} (${it.porcentaje}%)" }
+                                        val file = PdfReportGenerator.generateMonthlyMovementsPdf(context, anioSeleccionado, totalAnual, totalMovimientos, promedioMensual, statsList)
+                                        if (file != null) {
+                                            ReportShareUtils.sharePdfViaWhatsApp(context, file, "Movimientos por Mes ($anioSeleccionado)")
+                                        }
+                                    }
+                                )
+                            }
+                        }
+
+                        Surface(
+                            onClick = { expandedAnio = true },
+                            shape = RoundedCornerShape(20.dp),
+                            color = Color.White.copy(alpha = 0.2f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Filled.DateRange, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(anioSeleccionado, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            }
+                            DropdownMenu(
+                                expanded = expandedAnio,
+                                onDismissRequest = { expandedAnio = false }
+                            ) {
+                                aniosDisponibles.forEach { anio ->
+                                    DropdownMenuItem(
+                                        text = { Text(anio) },
+                                        onClick = {
+                                            viewModel.setSelectedYear(anio)
+                                            expandedAnio = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF0F0728))
             )
         }
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color(0xFF0F0728), Color(0xFF1E103F), Color(0xFF13092A))
+                    )
+                )
+                .padding(padding)
+        ) {
             if (uiState.isLoading) {
-                CircularProgressIndicator()
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Color.White)
+                }
             } else {
-                Text("Movimientos por Mes (${uiState.movimientos.size} movimientos)")
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(20.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        Brush.linearGradient(
+                                            colors = listOf(Color(0xFF10B981), Color(0xFF059669), Color(0xFF047857))
+                                        )
+                                    )
+                                    .padding(20.dp)
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column {
+                                            Text("Total Movimientos ($anioSeleccionado)", color = Color.White.copy(alpha = 0.85f), fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text("S/ %.2f".format(totalAnual), color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
+                                        }
+                                        Box(
+                                            modifier = Modifier
+                                                .size(50.dp)
+                                                .background(Color.White.copy(alpha = 0.2f), shape = RoundedCornerShape(14.dp)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(Icons.Filled.DateRange, contentDescription = null, tint = Color.White, modifier = Modifier.size(28.dp))
+                                        }
+                                    }
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column {
+                                            Text("Movimientos", color = Color.White.copy(alpha = 0.7f), fontSize = 11.sp)
+                                            Text("$totalMovimientos", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                        Column {
+                                            Text("Promedio Mensual", color = Color.White.copy(alpha = 0.7f), fontSize = 11.sp)
+                                            Text("S/ %.2f".format(promedioMensual), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Detalle por Mes", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Surface(
+                                onClick = { expandedSort = true },
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color.White.copy(alpha = 0.1f)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Filled.Menu, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(uiState.sortOrderTotal, color = Color.White, fontSize = 11.sp)
+                                    Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                }
+                                DropdownMenu(
+                                    expanded = expandedSort,
+                                    onDismissRequest = { expandedSort = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Mayor a menor") },
+                                        onClick = {
+                                            viewModel.setSortOrderTotal("Mayor a menor")
+                                            expandedSort = false
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Menor a mayor") },
+                                        onClick = {
+                                            viewModel.setSortOrderTotal("Menor a mayor")
+                                            expandedSort = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    items(mesStats) { stat ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E103F))
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .background(Color(0xFF10B981).copy(alpha = 0.2f), shape = RoundedCornerShape(10.dp)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(Icons.Filled.DateRange, contentDescription = null, tint = Color(0xFF10B981), modifier = Modifier.size(20.dp))
+                                        }
+                                        Column {
+                                            Text(stat.nombre, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                                            Text("${stat.count} movimientos", color = Color.White.copy(alpha = 0.6f), fontSize = 12.sp)
+                                        }
+                                    }
+                                    Column(horizontalAlignment = Alignment.End) {
+                                        Text("S/ %.2f".format(stat.monto), color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                                        Text("%.1f%% del total".format(stat.porcentaje), color = Color(0xFF10B981), fontSize = 12.sp)
+                                    }
+                                }
+
+                                // Progress bar
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(6.dp)
+                                        .background(Color.White.copy(alpha = 0.1f), shape = RoundedCornerShape(3.dp))
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth(fraction = (stat.porcentaje / 100f).coerceIn(0.0, 1.0).toFloat())
+                                            .height(6.dp)
+                                            .background(
+                                                Brush.horizontalGradient(
+                                                    colors = listOf(Color(0xFF10B981), Color(0xFF3B82F6))
+                                                ),
+                                                shape = RoundedCornerShape(3.dp)
+                                            )
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
+                }
             }
         }
     }
@@ -609,32 +977,81 @@ fun ReporteTotalScreen(
                     }
                 },
                 actions = {
-                    Surface(
-                        onClick = { expandedAnio = true },
-                        shape = RoundedCornerShape(20.dp),
-                        color = Color.White.copy(alpha = 0.2f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                    val context = LocalContext.current
+                    var expandedExport by remember { mutableStateOf(false) }
+
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Surface(
+                            onClick = { expandedExport = true },
+                            shape = RoundedCornerShape(20.dp),
+                            color = Color.White.copy(alpha = 0.2f)
                         ) {
-                            Icon(Icons.Filled.DateRange, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(anioSeleccionado, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                            Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                        }
-                        DropdownMenu(
-                            expanded = expandedAnio,
-                            onDismissRequest = { expandedAnio = false }
-                        ) {
-                            aniosDisponibles.forEach { anio ->
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Filled.Share, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Exportar", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                                Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            }
+                            DropdownMenu(
+                                expanded = expandedExport,
+                                onDismissRequest = { expandedExport = false },
+                                modifier = Modifier.background(Color(0xFF1E103F))
+                            ) {
                                 DropdownMenuItem(
-                                    text = { Text(anio) },
+                                    text = { Text("Descargar PDF", color = Color.White) },
                                     onClick = {
-                                        viewModel.setSelectedYear(anio)
-                                        expandedAnio = false
+                                        expandedExport = false
+                                        val statsList = mesStats.map { "${it.first}: S/ ${it.second} (${it.third}%)" }
+                                        val file = PdfReportGenerator.generateTotalMonthlyPdf(context, anioSeleccionado, totalAnual, totalMovimientos, promedioMensual, statsList)
+                                        if (file != null) {
+                                            ReportShareUtils.openPdfFile(context, file)
+                                        }
                                     }
                                 )
+                                DropdownMenuItem(
+                                    text = { Text("Enviar por WhatsApp", color = Color.White) },
+                                    onClick = {
+                                        expandedExport = false
+                                        val statsList = mesStats.map { "${it.first}: S/ ${it.second} (${it.third}%)" }
+                                        val file = PdfReportGenerator.generateTotalMonthlyPdf(context, anioSeleccionado, totalAnual, totalMovimientos, promedioMensual, statsList)
+                                        if (file != null) {
+                                            ReportShareUtils.sharePdfViaWhatsApp(context, file, "Reporte Total Mensual ($anioSeleccionado)")
+                                        }
+                                    }
+                                )
+                            }
+                        }
+
+                        Surface(
+                            onClick = { expandedAnio = true },
+                            shape = RoundedCornerShape(20.dp),
+                            color = Color.White.copy(alpha = 0.2f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Filled.DateRange, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(anioSeleccionado, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            }
+                            DropdownMenu(
+                                expanded = expandedAnio,
+                                onDismissRequest = { expandedAnio = false }
+                            ) {
+                                aniosDisponibles.forEach { anio ->
+                                    DropdownMenuItem(
+                                        text = { Text(anio) },
+                                        onClick = {
+                                            viewModel.setSelectedYear(anio)
+                                            expandedAnio = false
+                                        }
+                                    )
+                                }
                             }
                         }
                     }

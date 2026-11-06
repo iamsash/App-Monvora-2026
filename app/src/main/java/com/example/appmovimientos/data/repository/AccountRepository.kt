@@ -56,4 +56,10 @@ class AccountRepository {
         val uid = getUid() ?: throw IllegalStateException("Usuario no autenticado")
         database.child("users").child(uid).child("cuentas").child(accountId).removeValue().await()
     }
+
+    suspend fun updateAccount(account: Account) {
+        val uid = getUid() ?: throw IllegalStateException("Usuario no autenticado")
+        if (account.id.isBlank()) throw IllegalArgumentException("ID de cuenta inválido")
+        database.child("users").child(uid).child("cuentas").child(account.id).setValue(account).await()
+    }
 }

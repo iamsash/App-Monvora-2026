@@ -85,4 +85,26 @@ class CuentasViewModel(
             }
         }
     }
+
+    fun updateAccount(
+        account: Account,
+        nuevoSaldoStr: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val saldo = nuevoSaldoStr.toDoubleOrNull()
+        if (saldo == null) {
+            onError("Por favor ingresa un monto válido")
+            return
+        }
+        viewModelScope.launch {
+            try {
+                val updated = account.copy(balance = saldo)
+                accountRepository.updateAccount(updated)
+                onSuccess()
+            } catch (e: Exception) {
+                onError(e.message ?: "Error al actualizar la cuenta")
+            }
+        }
+    }
 }

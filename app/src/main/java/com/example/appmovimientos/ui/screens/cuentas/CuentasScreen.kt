@@ -34,6 +34,8 @@ fun CuentasScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     var showDeleteDialog by remember { mutableStateOf<Account?>(null) }
+    var showEditDialog by remember { mutableStateOf<Account?>(null) }
+    var nuevoSaldoInput by remember { mutableStateOf("") }
 
     val totalCuentasBalance = uiState.cuentas.sumOf { it.balance }
     val totalCuentasCount = uiState.cuentas.size
@@ -200,7 +202,10 @@ fun CuentasScreen(
                         itemsIndexed(uiState.cuentas) { _, account ->
                             AdminAccountCard(
                                 account = account,
-                                onEdit = { Toast.makeText(context, "Editar cuenta próximamente", Toast.LENGTH_SHORT).show() },
+                                onEdit = {
+                                    showEditDialog = account
+                                    nuevoSaldoInput = account.balance.toString()
+                                },
                                 onDelete = { showDeleteDialog = account }
                             )
                         }
@@ -208,6 +213,54 @@ fun CuentasScreen(
                 }
             }
         }
+    }
+
+    showEditDialog?.let { account ->
+        AlertDialog(
+            onDismissRequest = { showEditDialog = null },
+            title = { Text("Actualizar Saldo") },
+            text = {
+                Column {
+                    Text("Ingresa el nuevo saldo o suma dinero para '${account.name}':")
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = nuevoSaldoInput,
+                        onValueChange = { nuevoSaldoInput = it },
+                        label = { Text("Saldo (S/.)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.updateAccount(
+                            account = account,
+                            nuevoSaldoStr = nuevoSaldoInput,
+                            onSuccess = {
+                                Toast.makeText(context, "Saldo actualizado exitosamente", Toast.LENGTH_SHORT).show()
+                                showEditDialog = null
+                            },
+                            onError = { errorMsg ->
+                                Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
+                ) {
+                    Text("Guardar", color = Color(0xFF6366F1), fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditDialog = null }) {
+                    Text("Cancelar")
+                }
+            },
+            shape = RoundedCornerShape(20.dp),
+            containerColor = Color.White
+        )
     }
 
     showDeleteDialog?.let { account ->

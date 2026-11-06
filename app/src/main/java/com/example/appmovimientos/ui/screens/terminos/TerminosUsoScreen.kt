@@ -40,7 +40,7 @@ fun TerminosUsoScreen(navController: NavController) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                "Términos y Condiciones de Uso - ECONOTE",
+                "Términos y Condiciones de Uso - MONVORA",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF1E293B)
@@ -55,28 +55,28 @@ fun TerminosUsoScreen(navController: NavController) {
 
             Text(
                 "1. Aceptación de los términos\n" +
-                        "Al acceder y utilizar la aplicación ECONOTE, usted acepta cumplir y estar sujeto a los presentes términos y condiciones de uso. Si no está de acuerdo con alguna parte de estos términos, deberá abstenerse de utilizar la aplicación.",
+                        "Al acceder y utilizar la aplicación MONVORA, usted acepta cumplir y estar sujeto a los presentes términos y condiciones de uso. Si no está de acuerdo con alguna parte de estos términos, deberá abstenerse de utilizar la aplicación.",
                 fontSize = 14.sp,
                 color = Color(0xFF475569)
             )
 
             Text(
                 "2. Descripción del servicio\n" +
-                        "ECONOTE es una aplicación de gestión de finanzas personales diseñada para ayudar a los usuarios a registrar ingresos, gastos, administrar cuentas bancarias y visualizar reportes financieros. La aplicación almacena la información de manera segura utilizando servicios en la nube de Firebase.",
+                        "MONVORA es una aplicación de gestión de finanzas personales diseñada para ayudar a los usuarios a registrar ingresos, gastos, administrar cuentas bancarias y visualizar reportes financieros. La aplicación almacena la información de manera segura utilizando servicios en la nube de Firebase.",
                 fontSize = 14.sp,
                 color = Color(0xFF475569)
             )
 
             Text(
                 "3. Registro de cuenta y seguridad\n" +
-                        "Para utilizar ECONOTE, el usuario debe crear una cuenta proporcionando información veraz y actualizada. El usuario es responsable de mantener la confidencialidad de su contraseña y de todas las actividades que ocurran bajo su cuenta.",
+                        "Para utilizar MONVORA el usuario debe crear una cuenta proporcionando información veraz y actualizada. El usuario es responsable de mantener la confidencialidad de su contraseña y de todas las actividades que ocurran bajo su cuenta.",
                 fontSize = 14.sp,
                 color = Color(0xFF475569)
             )
 
             Text(
                 "4. Privacidad de los datos financieros\n" +
-                        "Sus datos financieros son estrictamente personales. ECONOTE no comparte ni vende información financiera a terceros con fines comerciales.",
+                        "Sus datos financieros son estrictamente personales. MONVORA no comparte ni vende información financiera a terceros con fines comerciales.",
                 fontSize = 14.sp,
                 color = Color(0xFF475569)
             )
