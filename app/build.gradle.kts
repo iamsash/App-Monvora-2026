@@ -21,7 +21,13 @@ android {
 
 
     buildTypes {
+        debug {
+            // API del asistente corriendo en la PC: el emulador la ve como 10.0.2.2
+            buildConfigField("String", "ASISTENTE_API_URL", "\"http://10.0.2.2:5080/\"")
+        }
         release {
+            // Cambiar por la URL pública (HTTPS) cuando la API se publique, por ejemplo en Azure
+            buildConfigField("String", "ASISTENTE_API_URL", "\"https://CAMBIAR-URL-DE-LA-API/\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -38,6 +44,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -59,6 +66,8 @@ dependencies {
 
     // Test
     testImplementation(libs.junit)
+    // org.json real para pruebas unitarias (en Android viene incluido)
+    testImplementation("org.json:json:20240303")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

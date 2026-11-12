@@ -34,6 +34,8 @@ import com.example.appmovimientos.R
 import com.example.appmovimientos.data.model.Account
 import com.example.appmovimientos.data.model.Expense
 import com.example.appmovimientos.ui.theme.AppColors
+import com.example.appmovimientos.ui.components.IconoAsistente
+import com.example.appmovimientos.ui.components.TarjetaAsistente
 import kotlinx.coroutines.launch
 
 @Composable
@@ -360,6 +362,11 @@ fun MainScreen(
                                 }
                             }
                         }
+                    }
+
+                    // ✨ Asistente IA: acceso rápido al chat
+                    item {
+                        TarjetaAsistente(onClick = { navController.navigate("asistente") })
                     }
 
                     // 🆕 Top 5 Categorías con Más Gastos
@@ -985,6 +992,12 @@ fun EconoteDrawerContent(
             label = "Reportes y estadísticas",
             isSelected = currentRoute == "reportes",
             onClick = { onItemSelected("reportes") }
+        )
+        DrawerItem(
+            icon = IconoAsistente,
+            label = "Asistente IA",
+            isSelected = currentRoute == "asistente",
+            onClick = { onItemSelected("asistente") }
         )
 
         Spacer(modifier = Modifier.height(16.dp))

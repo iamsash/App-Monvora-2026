@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Solo versión de pruebas (debug): permite HTTP sin cifrar hacia la API del asistente
+  que corre en la PC (10.0.2.2 desde el emulador, o la IP local desde un celular en el mismo Wi-Fi).
+  La versión final (release) usa el archivo de src/main, que solo permite HTTPS.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

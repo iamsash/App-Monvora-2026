@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.appmovimientos.ui.screens.asistente.AsistenteScreen
 import com.example.appmovimientos.ui.screens.categorias.CategoriasScreen
 import com.example.appmovimientos.ui.screens.categorias.NuevaCategoriaScreen
 import com.example.appmovimientos.ui.screens.cuentas.CuentasScreen
@@ -61,5 +62,6 @@ fun AppNavigation() {
         composable("perfil") { PerfilScreen(navController) }
         composable("configuracion") { ConfiguracionScreen(navController) }
         composable("ayuda") { AyudaScreen(navController) }
+        composable("asistente") { AsistenteScreen(navController) }
     }
 }
