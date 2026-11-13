@@ -23,7 +23,11 @@ data class MensajeHistorial(val rol: String, val texto: String) {
 enum class TipoErrorAsistente { SESION, CUENTA_DESHABILITADA, LIMITE, PREGUNTA_INVALIDA, NO_DISPONIBLE, SIN_CONEXION }
 
 sealed class ResultadoAsistente {
-    data class Exito(val respuesta: String, val consultasRestantes: Int?) : ResultadoAsistente()
+    data class Exito(
+        val respuesta: String,
+        val consultasRestantes: Int?,
+        val propuesta: Propuesta? = null
+    ) : ResultadoAsistente()
     data class Error(val tipo: TipoErrorAsistente, val mensaje: String, val consultasRestantes: Int? = null) : ResultadoAsistente()
 }
 
@@ -65,7 +69,7 @@ object AsistenteProtocolo {
         if (codigo == 200) {
             val respuesta = json?.optString("respuesta")?.takeIf { it.isNotBlank() }
                 ?: return ResultadoAsistente.Error(TipoErrorAsistente.NO_DISPONIBLE, MENSAJE_NO_DISPONIBLE, restantes)
-            return ResultadoAsistente.Exito(respuesta, restantes)
+            return ResultadoAsistente.Exito(respuesta, restantes, Propuesta.desdeJson(json?.optJSONObject("accion")))
         }
 
         val tipo = when (codigo) {

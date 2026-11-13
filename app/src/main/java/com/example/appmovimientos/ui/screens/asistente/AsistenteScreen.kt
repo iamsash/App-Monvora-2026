@@ -1,5 +1,14 @@
 package com.example.appmovimientos.ui.screens.asistente
 
+import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.speech.RecognizerIntent
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -113,7 +122,21 @@ fun AsistenteScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        items(uiState.mensajes, key = { it.id }) { mensaje -> Burbuja(mensaje) }
+                        items(uiState.mensajes, key = { it.id }) { mensaje ->
+                            Column {
+                                Burbuja(mensaje)
+                                if (mensaje.propuesta != null) {
+                                    TarjetaPropuesta(
+                                        propuesta = mensaje.propuesta,
+                                        estado = mensaje.estadoPropuesta,
+                                        error = mensaje.errorPropuesta,
+                                        onGuardar = { viewModel.confirmarPropuesta(mensaje.id) },
+                                        onCancelar = { viewModel.cancelarPropuesta(mensaje.id) },
+                                        modifier = Modifier.padding(start = 36.dp, top = 8.dp)
+                                    )
+                                }
+                            }
+                        }
                         if (uiState.enviando) {
                             item(key = "escribiendo") { Escribiendo() }
                         }
@@ -124,6 +147,8 @@ fun AsistenteScreen(
             BarraEntrada(
                 texto = uiState.texto,
                 onTextoChange = viewModel::onTextoChange,
+                onDictado = viewModel::onTextoDictado,
+                habilitado = !uiState.enviando,
                 onEnviar = viewModel::enviar,
                 puedeEnviar = uiState.puedeEnviar,
                 consultasRestantes = uiState.consultasRestantes
@@ -146,9 +171,10 @@ private fun Bienvenida(onPregunta: (String) -> Unit, habilitado: Boolean) {
         Text("Pregúntale a Monvora", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            "Consulta tus gastos, ingresos y cuentas con tus datos reales.",
+            "Consulta tus finanzas o registra gastos, ingresos, cuentas y categorías escribiendo o por voz 🎤.",
             fontSize = 14.sp,
-            color = Color(0xFFC4B5FD)
+            color = Color(0xFFC4B5FD),
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(24.dp))
         AsistenteViewModel.PREGUNTAS_SUGERIDAS.forEach { pregunta ->
@@ -228,10 +254,32 @@ private fun Escribiendo() {
 private fun BarraEntrada(
     texto: String,
     onTextoChange: (String) -> Unit,
+    onDictado: (String) -> Unit,
+    habilitado: Boolean,
     onEnviar: () -> Unit,
     puedeEnviar: Boolean,
     consultasRestantes: Int?
 ) {
+    val context = LocalContext.current
+    // Dictado con el reconocedor de voz del teléfono: el texto llega a la caja para revisarlo antes de enviar
+    val reconocedor = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultado ->
+        if (resultado.resultCode == Activity.RESULT_OK) {
+            resultado.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.let(onDictado)
+        }
+    }
+    val dictar = {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-PE")
+            putExtra(RecognizerIntent.EXTRA_PROMPT, "Dime qué quieres registrar o consultar")
+        }
+        try {
+            reconocedor.launch(intent)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(context, "Tu teléfono no tiene reconocimiento de voz disponible", Toast.LENGTH_LONG).show()
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -242,7 +290,7 @@ private fun BarraEntrada(
             OutlinedTextField(
                 value = texto,
                 onValueChange = onTextoChange,
-                placeholder = { Text("Escribe tu pregunta…", color = Color(0xFF94A3B8)) },
+                placeholder = { Text("Escribe o dicta…", color = Color(0xFF94A3B8)) },
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(24.dp),
                 maxLines = 4,
@@ -261,7 +309,18 @@ private fun BarraEntrada(
                     unfocusedContainerColor = Color(0xFF1E103F)
                 )
             )
-            Spacer(modifier = Modifier.size(8.dp))
+            Spacer(modifier = Modifier.size(6.dp))
+            IconButton(
+                onClick = dictar,
+                enabled = habilitado,
+                modifier = Modifier
+                    .size(44.dp)
+                    .background(Color(0xFF1E103F), CircleShape),
+                colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFFC4B5FD), disabledContentColor = Color(0xFF5B4B8A))
+            ) {
+                Icon(IconoMicrofono, contentDescription = "Dictar por voz")
+            }
+            Spacer(modifier = Modifier.size(6.dp))
             IconButton(
                 onClick = onEnviar,
                 enabled = puedeEnviar,
