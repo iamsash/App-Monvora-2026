@@ -35,6 +35,9 @@ import com.example.appmovimientos.R
 import com.example.appmovimientos.data.model.Account
 import com.example.appmovimientos.data.model.Expense
 import com.example.appmovimientos.ui.theme.AppColors
+import com.example.appmovimientos.ui.theme.DialogoMonvora
+import com.example.appmovimientos.ui.theme.Monvora
+import androidx.compose.foundation.BorderStroke
 import com.example.appmovimientos.ui.components.IconoAsistente
 import com.example.appmovimientos.ui.components.TarjetaAsistente
 import kotlinx.coroutines.launch
@@ -128,7 +131,7 @@ fun MainScreen(
         drawerContent = {
             ModalDrawerSheet(
                 modifier = Modifier.width(300.dp),
-                drawerContainerColor = Color.White
+                drawerContainerColor = Monvora.FondoOscuro
             ) {
                 EconoteDrawerContent(
                     currentRoute = "main",
@@ -905,7 +908,7 @@ fun EconoteDrawerContent(
         modifier = Modifier
             .fillMaxHeight()
             .width(300.dp)
-            .background(Color.White)
+            .background(Monvora.FondoPantalla)
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
@@ -919,9 +922,7 @@ fun EconoteDrawerContent(
                 modifier = Modifier
                     .size(56.dp)
                     .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(Color(0xFFEDE9FE), Color(0xFFDDD6FE))
-                        ),
+                        brush = Monvora.DegradadoPrincipal,
                         shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
@@ -933,16 +934,19 @@ fun EconoteDrawerContent(
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                "MONVORA",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFF1E293B)
-            )
+            Column {
+                Text(
+                    "MONVORA",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White
+                )
+                Text("TUS FINANZAS, TU CAMINO", fontSize = 10.sp, color = Monvora.LilaClaro, fontWeight = FontWeight.Medium)
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-        HorizontalDivider(color = Color(0xFFF1F5F9))
+        HorizontalDivider(color = Monvora.BordeOscuro)
         Spacer(modifier = Modifier.height(12.dp))
 
         DrawerItem(
@@ -987,7 +991,7 @@ fun EconoteDrawerContent(
             "MI MONVORA",
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF94A3B8),
+            color = Monvora.Lila,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
         )
 
@@ -1017,7 +1021,7 @@ fun EconoteDrawerContent(
         )
 
         Spacer(modifier = Modifier.height(24.dp))
-        HorizontalDivider(color = Color(0xFFF1F5F9))
+        HorizontalDivider(color = Monvora.BordeOscuro)
         Spacer(modifier = Modifier.height(16.dp))
 
         DrawerItem(
@@ -1038,8 +1042,8 @@ fun DrawerItem(
     isDestructive: Boolean = false,
     onClick: () -> Unit
 ) {
-    val backgroundColor = if (isSelected) Color(0xFFEDE9FE) else Color.Transparent
-    val contentColor = if (isDestructive) Color(0xFFEF4444) else if (isSelected) Color(0xFF7C3AED) else Color(0xFF475569)
+    val backgroundColor = if (isSelected) Color.White.copy(alpha = 0.10f) else Color.Transparent
+    val contentColor = if (isDestructive) Color(0xFFF87171) else if (isSelected) Color(0xFFC084FC) else Color(0xFFE2E8F0)
 
     Surface(
         modifier = Modifier
@@ -1410,19 +1414,24 @@ fun MovimientosPorCuentaDialog(
         .filter { it.type == "Ingreso" }
         .sumOf { MoneyUtils.montoDe(it) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Column {
-                Text(cuenta.name, fontWeight = FontWeight.Bold)
-                Text(
-                    "Saldo: ${dinero(cuenta.balance)}",
-                    fontSize = 14.sp,
-                    color = Color.Gray
-                )
+    DialogoMonvora(
+        titulo = cuenta.name,
+        subtitulo = "Saldo: ${dinero(cuenta.balance)}",
+        onCerrar = onDismiss,
+        iconoEncabezado = {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Filled.AccountBox, contentDescription = null, tint = Color.White)
             }
         },
-        text = {
+        botones = {
+            TextButton(onClick = onDismiss) { Text("Cerrar", color = Monvora.Morado, fontWeight = FontWeight.SemiBold) }
+        }
+    ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1431,7 +1440,7 @@ fun MovimientosPorCuentaDialog(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFF5F5F5)
+                        containerColor = Monvora.LilaFondo
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
@@ -1442,7 +1451,7 @@ fun MovimientosPorCuentaDialog(
                         horizontalArrangement = Arrangement.SpaceAround
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Ingresos", fontSize = 12.sp, color = Color.Gray)
+                            Text("Ingresos", fontSize = 12.sp, color = Monvora.TextoSuave)
                             Text(
                                 dinero(ingresoTotal),
                                 color = Color(0xFF10B981),
@@ -1450,7 +1459,7 @@ fun MovimientosPorCuentaDialog(
                             )
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Gastos", fontSize = 12.sp, color = Color.Gray)
+                            Text("Gastos", fontSize = 12.sp, color = Monvora.TextoSuave)
                             Text(
                                 dinero(gastoTotal),
                                 color = Color(0xFFEF4444),
@@ -1458,7 +1467,7 @@ fun MovimientosPorCuentaDialog(
                             )
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Total", fontSize = 12.sp, color = Color.Gray)
+                            Text("Total", fontSize = 12.sp, color = Monvora.TextoSuave)
                             Text(
                                 "${movimientos.size}",
                                 fontWeight = FontWeight.Bold,
@@ -1470,7 +1479,6 @@ fun MovimientosPorCuentaDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                (movimientos.isEmpty())
                 if (movimientos.isEmpty()) {
                     Box(
                         modifier = Modifier
@@ -1490,7 +1498,7 @@ fun MovimientosPorCuentaDialog(
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = CardDefaults.cardColors(containerColor = Color.White),
                                 shape = RoundedCornerShape(12.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                                border = BorderStroke(1.dp, Monvora.Divisor)
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -1522,13 +1530,5 @@ fun MovimientosPorCuentaDialog(
                     }
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cerrar")
-            }
-        },
-        shape = RoundedCornerShape(20.dp),
-        containerColor = Color(0xFFF8F9FF)
-    )
+    }
 }

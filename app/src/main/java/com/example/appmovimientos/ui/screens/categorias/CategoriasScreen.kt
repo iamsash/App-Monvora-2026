@@ -26,6 +26,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.appmovimientos.data.model.Category
 import com.example.appmovimientos.ui.components.CategoryCard
+import com.example.appmovimientos.ui.theme.DialogoMonvora
+import com.example.appmovimientos.ui.theme.Monvora
+import com.example.appmovimientos.ui.theme.PantallaMonvora
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,36 +60,16 @@ fun CategoriasScreen(
         )
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Mis Categorías",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            Icons.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF6366F1)
-                )
-            )
-        },
+    PantallaMonvora(
+        titulo = "Mis Categorías",
+        onVolver = { navController.popBackStack() },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navController.navigate("nuevaCategoria") },
-                containerColor = Color(0xFF6366F1),
+                containerColor = Color.Transparent,
                 contentColor = Color.White,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.background(Monvora.DegradadoCategorias, RoundedCornerShape(16.dp))
             ) {
                 Icon(
                     Icons.Filled.Add,
@@ -99,14 +82,6 @@ fun CategoriasScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFFF0F4FF),
-                            Color(0xFFE8EEFF)
-                        )
-                    )
-                )
                 .padding(padding)
         ) {
             Column(
@@ -116,7 +91,7 @@ fun CategoriasScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    shape = RoundedCornerShape(20.dp),
+                    shape = Monvora.FormaTarjeta,
                     colors = CardDefaults.cardColors(
                         containerColor = Color.White
                     ),
@@ -139,14 +114,7 @@ fun CategoriasScreen(
                                     "${categorias.size}",
                                     fontSize = 32.sp,
                                     fontWeight = FontWeight.Bold,
-                                    style = TextStyle(
-                                        brush = Brush.linearGradient(
-                                            colors = listOf(
-                                                Color(0xFF6366F1),
-                                                Color(0xFF8B5CF6)
-                                            )
-                                        )
-                                    )
+                                    style = TextStyle(brush = Monvora.DegradadoCategorias)
                                 )
                             }
 
@@ -154,12 +122,7 @@ fun CategoriasScreen(
                                 modifier = Modifier
                                     .size(64.dp)
                                     .background(
-                                        brush = Brush.linearGradient(
-                                            colors = listOf(
-                                                Color(0xFF6366F1),
-                                                Color(0xFF8B5CF6)
-                                            )
-                                        ),
+                                        brush = Monvora.DegradadoCategorias,
                                         shape = RoundedCornerShape(16.dp)
                                     ),
                                 contentAlignment = Alignment.Center
@@ -251,12 +214,12 @@ fun CategoriasScreen(
                             )
                         },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Color(0xFF6366F1),
+                            selectedContainerColor = Monvora.Naranja,
                             selectedLabelColor = Color.White,
                             selectedLeadingIconColor = Color.White,
-                            containerColor = Color.White,
-                            labelColor = Color(0xFF64748B),
-                            iconColor = Color(0xFF64748B)
+                            containerColor = Color.White.copy(alpha = 0.08f),
+                            labelColor = Monvora.LilaClaro,
+                            iconColor = Monvora.LilaClaro
                         )
                     )
 
@@ -281,9 +244,9 @@ fun CategoriasScreen(
                             selectedContainerColor = Color(0xFF10B981),
                             selectedLabelColor = Color.White,
                             selectedLeadingIconColor = Color.White,
-                            containerColor = Color.White,
-                            labelColor = Color(0xFF64748B),
-                            iconColor = Color(0xFF64748B)
+                            containerColor = Color.White.copy(alpha = 0.08f),
+                            labelColor = Monvora.LilaClaro,
+                            iconColor = Monvora.LilaClaro
                         )
                     )
 
@@ -308,9 +271,9 @@ fun CategoriasScreen(
                             selectedContainerColor = Color(0xFFEF4444),
                             selectedLabelColor = Color.White,
                             selectedLeadingIconColor = Color.White,
-                            containerColor = Color.White,
-                            labelColor = Color(0xFF64748B),
-                            iconColor = Color(0xFF64748B)
+                            containerColor = Color.White.copy(alpha = 0.08f),
+                            labelColor = Monvora.LilaClaro,
+                            iconColor = Monvora.LilaClaro
                         )
                     )
                 }
@@ -321,7 +284,7 @@ fun CategoriasScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(
-                            color = Color(0xFF6366F1)
+                            color = Monvora.LilaClaro
                         )
                     }
                 } else if (categorias.isEmpty()) {
@@ -337,7 +300,7 @@ fun CategoriasScreen(
                                 modifier = Modifier
                                     .size(120.dp)
                                     .background(
-                                        color = Color(0xFFF0F4FF),
+                                        color = Color.White.copy(alpha = 0.08f),
                                         shape = CircleShape
                                     ),
                                 contentAlignment = Alignment.Center
@@ -346,7 +309,7 @@ fun CategoriasScreen(
                                     Icons.Filled.Menu,
                                     contentDescription = null,
                                     modifier = Modifier.size(64.dp),
-                                    tint = Color(0xFF6366F1)
+                                    tint = Monvora.LilaClaro
                                 )
                             }
 
@@ -356,7 +319,7 @@ fun CategoriasScreen(
                                 "No hay categorías aún",
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1E293B)
+                                color = Color.White
                             )
 
                             Spacer(modifier = Modifier.height(8.dp))
@@ -364,13 +327,13 @@ fun CategoriasScreen(
                             Text(
                                 "Crea tu primera categoría para organizar",
                                 fontSize = 14.sp,
-                                color = Color(0xFF64748B),
+                                color = Monvora.LilaClaro,
                                 textAlign = TextAlign.Center
                             )
                             Text(
                                 "mejor tus gastos e ingresos",
                                 fontSize = 14.sp,
-                                color = Color(0xFF64748B),
+                                color = Monvora.LilaClaro,
                                 textAlign = TextAlign.Center
                             )
 
@@ -379,7 +342,7 @@ fun CategoriasScreen(
                             Button(
                                 onClick = { navController.navigate("nuevaCategoria") },
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF6366F1)
+                                    containerColor = Monvora.Naranja
                                 ),
                                 shape = RoundedCornerShape(12.dp),
                                 modifier = Modifier
@@ -409,7 +372,7 @@ fun CategoriasScreen(
                                         .fillMaxWidth(0.7f)
                                         .height(50.dp)
                                 ) {
-                                    Text("✨ Agregar categorías sugeridas", color = Color(0xFF6366F1), fontWeight = FontWeight.SemiBold)
+                                    Text("✨ Agregar categorías sugeridas", color = Monvora.LilaClaro, fontWeight = FontWeight.SemiBold)
                                 }
                             }
                         }
@@ -452,9 +415,9 @@ fun CategoriasScreen(
                                         "Gasto" -> "Categorías de Gasto (${categoriasFiltradas.size})"
                                         else -> "Todas las categorías (${categoriasFiltradas.size})"
                                     },
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFF475569)
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
                                 )
 
                                 if (filtroSeleccionado != "Todas") {
@@ -538,29 +501,17 @@ fun CategoriasScreen(
     }
 
     showDeleteDialog?.let { category ->
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = null },
-            icon = {
-                Icon(
-                    Icons.Filled.Delete,
-                    contentDescription = null,
-                    tint = Color(0xFFEF4444),
-                    modifier = Modifier.size(32.dp)
-                )
-            },
-            title = {
-                Text(
-                    "Eliminar Categoría",
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Text(
-                    "¿Estás seguro de que deseas eliminar la categoría '${category.name}'? Esta acción no se puede deshacer.",
-                    color = Color(0xFF64748B)
-                )
-            },
-            confirmButton = {
+        DialogoMonvora(
+            titulo = "Eliminar Categoría",
+            subtitulo = category.name,
+            encabezado = Monvora.DegradadoRegistrar,
+            onCerrar = { showDeleteDialog = null },
+            botones = {
+                OutlinedButton(
+                    onClick = { showDeleteDialog = null },
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Monvora.Divisor)
+                ) { Text("Cancelar", color = Monvora.TextoSuave) }
                 Button(
                     onClick = {
                         viewModel.deleteCategory(
@@ -574,26 +525,13 @@ fun CategoriasScreen(
                         )
                         showDeleteDialog = null
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFEF4444)
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text("Eliminar", fontWeight = FontWeight.SemiBold)
-                }
-            },
-            dismissButton = {
-                OutlinedButton(
-                    onClick = { showDeleteDialog = null },
-                    shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(1.dp, Color(0xFFE2E8F0))
-                ) {
-                    Text("Cancelar", color = Color(0xFF64748B))
-                }
-            },
-            shape = RoundedCornerShape(20.dp),
-            containerColor = Color.White
-        )
+                    colors = ButtonDefaults.buttonColors(containerColor = Monvora.Rojo),
+                    shape = RoundedCornerShape(12.dp)
+                ) { Text("Eliminar", fontWeight = FontWeight.SemiBold) }
+            }
+        ) {
+            Text("¿Estás seguro de que deseas eliminar la categoría '${category.name}'? Esta acción no se puede deshacer.", color = Monvora.TextoMedio)
+        }
     }
 
     categoriaAEditar?.let { categoria ->
@@ -625,7 +563,7 @@ private fun AvisoSugeridas(faltantes: Int, vistaPrevia: String, agregando: Boole
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE9FE))
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -643,7 +581,7 @@ private fun AvisoSugeridas(faltantes: Int, vistaPrevia: String, agregando: Boole
             Button(
                 onClick = onAgregar,
                 enabled = !agregando,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6366F1)),
+                colors = ButtonDefaults.buttonColors(containerColor = Monvora.Naranja),
                 shape = RoundedCornerShape(10.dp)
             ) {
                 Text(if (agregando) "Agregando…" else "Agregar")

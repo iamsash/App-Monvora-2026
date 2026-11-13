@@ -1,5 +1,8 @@
 package com.example.appmovimientos.ui.screens.more
 
+import com.example.appmovimientos.ui.theme.Monvora
+import com.example.appmovimientos.ui.theme.PantallaMonvora
+import com.example.appmovimientos.ui.theme.coloresBotonDegradado
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,22 +20,10 @@ import androidx.navigation.NavController
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AyudaScreen(navController: NavController) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Ayuda y acerca de", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    PantallaMonvora(titulo = "Ayuda y acerca de", onVolver = { navController.popBackStack() }) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8F9FF))
                 .padding(padding)
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -44,14 +35,14 @@ fun AyudaScreen(navController: NavController) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Acerca de ECONOTE", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF1E293B))
+                    Text("Acerca de MONVORA", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF1E293B))
                     Text("Versión de la aplicación: 1.0.0 (Release)", fontSize = 14.sp, color = Color(0xFF64748B))
-                    Text("ECONOTE es tu asistente financiero personal diseñado para ayudarte a llevar el control total de tus ingresos, gastos, cuentas y reportes en tiempo real.", fontSize = 14.sp, color = Color(0xFF475569))
+                    Text("MONVORA es tu asistente financiero personal diseñado para ayudarte a llevar el control total de tus ingresos, gastos, cuentas y reportes en tiempo real.", fontSize = 14.sp, color = Color(0xFF475569))
 
                     HorizontalDivider(color = Color(0xFFF1F5F9), modifier = Modifier.padding(vertical = 8.dp))
 
                     Text("¿Necesitas soporte?", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF1E293B))
-                    Text("Si tienes dudas, sugerencias o experimentas algún problema con tu cuenta, contáctanos en soporte@econote.app", fontSize = 14.sp, color = Color(0xFF475569))
+                    Text("Si tienes dudas, sugerencias o experimentas algún problema con tu cuenta, contáctanos en dmaghimilyc@gmail.com", fontSize = 14.sp, color = Color(0xFF475569))
                 }
             }
         }

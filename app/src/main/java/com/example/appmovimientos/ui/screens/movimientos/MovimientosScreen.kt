@@ -32,7 +32,15 @@ import androidx.navigation.NavController
 import com.example.appmovimientos.data.model.Account
 import com.example.appmovimientos.data.model.Category
 import com.example.appmovimientos.data.model.Expense
-import com.example.appmovimientos.ui.theme.AppColors
+import com.example.appmovimientos.ui.theme.BotonDegradado
+import com.example.appmovimientos.ui.theme.DialogoMonvora
+import com.example.appmovimientos.ui.theme.Monvora
+import com.example.appmovimientos.ui.theme.PantallaMonvora
+import com.example.appmovimientos.ui.theme.TarjetaMonvora
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.SolidColor
 import kotlinx.coroutines.delay
 import com.example.appmovimientos.utils.DateUtils
 
@@ -89,36 +97,24 @@ fun RegistroScreen(
         hoy.dayOfMonth
     )
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Nuevo Movimiento", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    PantallaMonvora(titulo = "Nuevo Movimiento", onVolver = { navController.popBackStack() }) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .verticalScroll(rememberScrollState())
                 .padding(20.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-            ) {
-                Column(modifier = Modifier.padding(32.dp)) {
+            TarjetaMonvora(modifier = Modifier.fillMaxWidth(), relleno = PaddingValues(24.dp)) {
+                Column {
                     Box(modifier = Modifier.fillMaxWidth()) {
                         OutlinedButton(
                             onClick = { expandedTipo = true },
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            border = BordeSelector,
+                            colors = coloresSelector(if (tipo == "Ingreso") Monvora.Verde else Monvora.Rojo)
                         ) {
                             Icon(
                                 if (tipo == "Ingreso") Icons.Filled.KeyboardArrowUp else Icons.Filled.ArrowDropDown,
@@ -162,7 +158,8 @@ fun RegistroScreen(
                         leadingIcon = { Icon(Icons.Filled.Check, contentDescription = null) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        colors = Monvora.coloresCampo
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -174,7 +171,8 @@ fun RegistroScreen(
                         leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        maxLines = 3
+                        maxLines = 3,
+                        colors = Monvora.coloresCampo
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -184,7 +182,9 @@ fun RegistroScreen(
                             OutlinedButton(
                                 onClick = { expandedCategoria = true },
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(12.dp),
+                                border = BordeSelector,
+                                colors = coloresSelector()
                             ) {
                                 IconoCategoria(categoriaSeleccionada, tamano = 28.dp)
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -217,7 +217,9 @@ fun RegistroScreen(
                             OutlinedButton(
                                 onClick = { expandedCuenta = true },
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(12.dp),
+                                border = BordeSelector,
+                                colors = coloresSelector()
                             ) {
                                 Icon(
                                     Icons.Filled.Check,
@@ -270,7 +272,9 @@ fun RegistroScreen(
                     OutlinedButton(
                         onClick = { datePickerDialog.show() },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        border = BordeSelector,
+                        colors = coloresSelector()
                     ) {
                         Icon(Icons.Filled.DateRange, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
@@ -279,7 +283,9 @@ fun RegistroScreen(
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    Button(
+                    BotonDegradado(
+                        texto = "Guardar Movimiento",
+                        degradado = Monvora.DegradadoRegistrar,
                         onClick = {
                             viewModel.createMovement(
                                 monto = monto,
@@ -297,14 +303,11 @@ fun RegistroScreen(
                                 }
                             )
                         },
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        enabled = monto.isNotBlank() && descripcion.isNotBlank() &&
+                        modifier = Modifier.fillMaxWidth(),
+                        habilitado = monto.isNotBlank() && descripcion.isNotBlank() &&
                                 cuentaSeleccionada != null &&
                                 (categoriasFiltradas.isEmpty() || categoriaSeleccionada != null)
-                    ) {
-                        Text("Guardar Movimiento", fontSize = 16.sp)
-                    }
+                    )
                 }
             }
         }
@@ -340,42 +343,10 @@ fun ListaScreen(
         .sumOf { MoneyUtils.montoDe(it) }
     val balance = totalIngresos - totalGastos
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Mis Movimientos",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            Icons.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF3B82F6)
-                )
-            )
-        }
-    ) { padding ->
+    PantallaMonvora(titulo = "Mis Movimientos", onVolver = { navController.popBackStack() }) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFFEFF6FF),
-                            Color(0xFFDBEAFE)
-                        )
-                    )
-                )
                 .padding(padding)
         ) {
             Column(
@@ -391,13 +362,7 @@ fun ListaScreen(
                     Column(
                         modifier = Modifier
                             .background(
-                                Brush.linearGradient(
-                                    colors = listOf(
-                                        Color(0xFF3B82F6),
-                                        Color(0xFF2563EB),
-                                        Color(0xFF1E40AF)
-                                    )
-                                )
+                                Monvora.DegradadoPrincipal
                             )
                             .padding(24.dp)
                     ) {
@@ -430,20 +395,21 @@ fun ListaScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = Color(0xFF3B82F6))
+                        CircularProgressIndicator(color = Monvora.LilaClaro)
                     }
                 } else if (movimientos.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No hay movimientos", color = Color.Gray)
+                        Text("No hay movimientos", color = Monvora.LilaClaro)
                     }
                 } else {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 16.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         itemsIndexed(movimientos) { _, expense ->
@@ -461,39 +427,34 @@ fun ListaScreen(
     }
 
     expenseToEdit?.let { expense ->
-        AlertDialog(
-            onDismissRequest = { expenseToEdit = null },
-            title = { Text("Gestionar Movimiento", fontWeight = FontWeight.Bold) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Monto: ${dinero(MoneyUtils.montoDe(expense))}")
-                    Text("Descripción: ${expense.description}")
-                    Text("Tipo: ${expense.type}")
-                    Text("Fecha: ${fechaVisible(expense.date)}")
-                }
-            },
-            confirmButton = {
+        DialogoMonvora(
+            titulo = "Gestionar Movimiento",
+            subtitulo = dinero(MoneyUtils.montoDe(expense)),
+            encabezado = if (expense.type == "Ingreso") Monvora.DegradadoPrincipal else Monvora.DegradadoRegistrar,
+            onCerrar = { expenseToEdit = null },
+            botones = {
                 TextButton(onClick = {
                     expenseToEdit = null
                     expenseToDelete = expense
-                }) {
-                    Text("Eliminar movimiento", color = Color.Red)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { expenseToEdit = null }) {
-                    Text("Cerrar")
-                }
+                }) { Text("Eliminar movimiento", color = Monvora.Rojo) }
+                TextButton(onClick = { expenseToEdit = null }) { Text("Cerrar", color = Monvora.Morado) }
             }
-        )
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilaDato("Descripción", expense.description)
+                FilaDato("Tipo", expense.type)
+                FilaDato("Fecha", fechaVisible(expense.date))
+            }
+        }
     }
 
     expenseToDelete?.let { expense ->
-        AlertDialog(
-            onDismissRequest = { expenseToDelete = null },
-            title = { Text("Eliminar Movimiento") },
-            text = { Text("¿Estás seguro de eliminar este movimiento?") },
-            confirmButton = {
+        DialogoMonvora(
+            titulo = "Eliminar Movimiento",
+            encabezado = Monvora.DegradadoRegistrar,
+            onCerrar = { expenseToDelete = null },
+            botones = {
+                TextButton(onClick = { expenseToDelete = null }) { Text("Cancelar", color = Monvora.TextoSuave) }
                 TextButton(onClick = {
                     viewModel.deleteMovement(
                         expense = expense,
@@ -506,16 +467,11 @@ fun ListaScreen(
                         }
                     )
                     expenseToDelete = null
-                }) {
-                    Text("Eliminar", color = Color.Red)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { expenseToDelete = null }) {
-                    Text("Cancelar")
-                }
+                }) { Text("Eliminar", color = Monvora.Rojo, fontWeight = FontWeight.Bold) }
             }
-        )
+        ) {
+            Text("¿Estás seguro de eliminar este movimiento? Se ajustará el saldo de la cuenta.", color = Monvora.TextoMedio)
+        }
     }
 }
 
@@ -529,20 +485,20 @@ fun ExpenseCard(
 ) {
     val (backgroundBrush, amountColor, icon) = when (expense.type) {
         "Ingreso" -> Triple(
-            Brush.linearGradient(listOf(Color(0xFF56ab2f), Color(0xFFa8e063))),
-            Color(0xFF2E7D32),
-            Icons.Filled.ArrowDropDown
+            SolidColor(Monvora.VerdeFondo),
+            Monvora.Verde,
+            Icons.Filled.KeyboardArrowUp
         )
         else -> Triple(
-            AppColors.ExpenseGradient,
-            Color(0xFFD32F2F),
+            SolidColor(Monvora.RojoFondo),
+            Monvora.Rojo,
             Icons.Filled.ShoppingCart
         )
     }
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -553,13 +509,13 @@ fun ExpenseCard(
             Box(
                 modifier = Modifier
                     .size(50.dp)
-                    .background(backgroundBrush, CircleShape),
+                    .background(backgroundBrush, RoundedCornerShape(14.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = amountColor,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -575,33 +531,48 @@ fun ExpenseCard(
                 )
                 Text(
                     text = expense.description,
-                    color = Color.Gray,
+                    color = Monvora.TextoOscuro,
+                    fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp
                 )
                 Text(
                     text = "${fechaVisible(expense.date)} • ${expense.type}",
-                    color = Color(0xFF666666),
+                    color = Monvora.Gris,
                     fontSize = 12.sp
                 )
                 if (category != null) {
                     Text(
                         text = "Categoría: ${category.name}",
-                        color = Color(0xFF444444),
+                        color = Monvora.TextoSuave,
                         fontSize = 12.sp
                     )
                 }
                 if (account != null) {
                     Text(
                         text = "Cuenta: ${account.name}",
-                        color = Color(0xFF444444),
+                        color = Monvora.TextoSuave,
                         fontSize = 12.sp
                     )
                 }
             }
 
             IconButton(onClick = onEdit) {
-                Icon(Icons.Filled.Edit, contentDescription = "Gestionar", tint = Color(0xFF3B82F6))
+                Icon(Icons.Filled.Edit, contentDescription = "Gestionar", tint = Monvora.Morado)
             }
         }
+    }
+}
+
+private val BordeSelector = BorderStroke(1.dp, Monvora.Divisor)
+
+@Composable
+private fun coloresSelector(contenido: Color = Monvora.Morado) =
+    ButtonDefaults.outlinedButtonColors(contentColor = contenido)
+
+@Composable
+private fun FilaDato(etiqueta: String, valor: String) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text(etiqueta, color = Monvora.TextoSuave, fontSize = 14.sp, modifier = Modifier.weight(0.4f))
+        Text(valor, color = Monvora.TextoOscuro, fontSize = 14.sp, fontWeight = FontWeight.Medium, modifier = Modifier.weight(0.6f))
     }
 }

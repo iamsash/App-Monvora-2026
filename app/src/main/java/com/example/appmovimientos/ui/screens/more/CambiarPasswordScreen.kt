@@ -1,5 +1,8 @@
 package com.example.appmovimientos.ui.screens.more
 
+import com.example.appmovimientos.ui.theme.Monvora
+import com.example.appmovimientos.ui.theme.PantallaMonvora
+import com.example.appmovimientos.ui.theme.coloresBotonDegradado
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -32,22 +35,10 @@ fun CambiarPasswordScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Cambiar contraseña", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    PantallaMonvora(titulo = "Cambiar contraseña", onVolver = { navController.popBackStack() }) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8F9FF))
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(24.dp),
@@ -139,9 +130,10 @@ fun CambiarPasswordScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(54.dp),
+                            .height(54.dp)
+                        .background(Monvora.DegradadoReportes, RoundedCornerShape(16.dp)),
                         shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6366F1)),
+                        colors = coloresBotonDegradado(),
                         enabled = !uiState.isLoading
                     ) {
                         if (uiState.isLoading) {

@@ -53,8 +53,12 @@ import com.example.appmovimientos.data.model.CategoriaSugerida
 import com.example.appmovimientos.data.model.CategoriasCatalogo
 import com.example.appmovimientos.data.model.Category
 import com.example.appmovimientos.ui.components.IconoEmoji
+import com.example.appmovimientos.ui.theme.BotonDegradado
+import com.example.appmovimientos.ui.theme.DialogoMonvora
+import com.example.appmovimientos.ui.theme.Monvora
+import com.example.appmovimientos.ui.theme.PantallaMonvora
 
-private val Morado = Color(0xFF6366F1)
+private val Morado = Monvora.Morado
 private val TextoOscuro = Color(0xFF1E293B)
 private val TextoGris = Color(0xFF64748B)
 
@@ -84,23 +88,10 @@ fun NuevaCategoriaScreen(
 
     val sugeridas = CategoriasCatalogo.faltantes(uiState.categorias, CategoriasCatalogo.deTipo(tipo))
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Nueva categoría", fontWeight = FontWeight.Bold, color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Morado)
-            )
-        }
-    ) { padding ->
+    PantallaMonvora(titulo = "Nueva categoría", onVolver = { navController.popBackStack() }) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF0F4FF))
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
@@ -152,7 +143,8 @@ fun NuevaCategoriaScreen(
                             label = { Text(if (sugerida == null) "Nombre de tu categoría" else "Nombre (puedes ajustarlo)") },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            colors = Monvora.coloresCampo
                         )
                         if (sugerida == null) {
                             Text(
@@ -164,7 +156,9 @@ fun NuevaCategoriaScreen(
 
                         errorMessage?.let { Text(it, color = Color(0xFFDC2626), fontSize = 13.sp) }
 
-                        Button(
+                        BotonDegradado(
+                            texto = "Crear categoría",
+                            degradado = Monvora.DegradadoCategorias,
                             onClick = {
                                 viewModel.createCategory(
                                     nombre = nombre,
@@ -177,13 +171,9 @@ fun NuevaCategoriaScreen(
                                     onError = { errorMessage = it }
                                 )
                             },
-                            enabled = nombre.isNotBlank(),
-                            modifier = Modifier.fillMaxWidth().height(52.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Morado)
-                        ) {
-                            Text("Crear categoría", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                        }
+                            habilitado = nombre.isNotBlank(),
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
@@ -205,10 +195,24 @@ fun EditarCategoriaDialog(
     }
     var nombre by remember { mutableStateOf(categoria.name) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Editar categoría", fontWeight = FontWeight.Bold) },
-        text = {
+    DialogoMonvora(
+        titulo = "Editar categoría",
+        subtitulo = categoria.name,
+        encabezado = Monvora.DegradadoCategorias,
+        onCerrar = onDismiss,
+        botones = {
+            OutlinedButton(onClick = onDismiss, shape = RoundedCornerShape(12.dp)) { Text("Cancelar", color = TextoGris) }
+            Button(
+                onClick = {
+                    val icono = (eleccion as? Eleccion.Sugerida)?.categoria?.id ?: CategoriasCatalogo.SIN_ICONO
+                    onSave(categoria, nombre, tipo, icono)
+                },
+                enabled = nombre.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(containerColor = Monvora.Naranja),
+                shape = RoundedCornerShape(12.dp)
+            ) { Text("Guardar", fontWeight = FontWeight.SemiBold) }
+        }
+    ) {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -221,7 +225,8 @@ fun EditarCategoriaDialog(
                     label = { Text("Nombre") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = Monvora.coloresCampo
                 )
                 SelectorTipo(tipo) {
                     if (it != tipo) {
@@ -236,24 +241,7 @@ fun EditarCategoriaDialog(
                     textoOtra = "Sin emoji"
                 )
             }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val icono = (eleccion as? Eleccion.Sugerida)?.categoria?.id ?: CategoriasCatalogo.SIN_ICONO
-                    onSave(categoria, nombre, tipo, icono)
-                },
-                enabled = nombre.isNotBlank(),
-                colors = ButtonDefaults.buttonColors(containerColor = Morado),
-                shape = RoundedCornerShape(10.dp)
-            ) { Text("Guardar") }
-        },
-        dismissButton = {
-            OutlinedButton(onClick = onDismiss, shape = RoundedCornerShape(10.dp)) { Text("Cancelar", color = TextoGris) }
-        },
-        shape = RoundedCornerShape(20.dp),
-        containerColor = Color.White
-    )
+    }
 }
 
 @Composable

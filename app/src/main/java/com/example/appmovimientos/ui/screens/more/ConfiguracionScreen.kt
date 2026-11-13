@@ -1,5 +1,8 @@
 package com.example.appmovimientos.ui.screens.more
 
+import com.example.appmovimientos.ui.theme.Monvora
+import com.example.appmovimientos.ui.theme.PantallaMonvora
+import com.example.appmovimientos.ui.theme.coloresBotonDegradado
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -34,29 +37,17 @@ fun ConfiguracionScreen(
     val monedas = listOf(AppSettings.MONEDA_PEN, AppSettings.MONEDA_USD)
     val formatosFecha = listOf("DD/MM/AAAA", "AAAA-MM-DD")
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Configuración", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    PantallaMonvora(titulo = "Configuración", onVolver = { navController.popBackStack() }) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8F9FF))
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Grupo: Apariencia
-            Text("Apariencia", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF6366F1))
+            Text("Apariencia", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Monvora.Lila)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -85,7 +76,7 @@ fun ConfiguracionScreen(
 
             // Grupo: Notificaciones
             Spacer(modifier = Modifier.height(4.dp))
-            Text("Notificaciones", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF6366F1))
+            Text("Notificaciones", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Monvora.Lila)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -112,7 +103,7 @@ fun ConfiguracionScreen(
 
             // Grupo: Preferencias regionales
             Spacer(modifier = Modifier.height(4.dp))
-            Text("Preferencias regionales", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF6366F1))
+            Text("Preferencias regionales", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Monvora.Lila)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),

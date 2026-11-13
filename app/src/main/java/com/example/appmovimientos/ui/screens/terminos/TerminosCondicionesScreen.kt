@@ -1,5 +1,8 @@
 package com.example.appmovimientos.ui.screens.terminos
 
+import com.example.appmovimientos.ui.theme.Monvora
+import com.example.appmovimientos.ui.theme.PantallaMonvora
+import com.example.appmovimientos.ui.theme.coloresBotonDegradado
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,22 +27,10 @@ import androidx.navigation.NavController
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TerminosCondicionesScreen(navController: NavController) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Términos y Condiciones", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    PantallaMonvora(titulo = "Términos y Condiciones", onVolver = { navController.popBackStack() }) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8F9FF))
                 .padding(padding)
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -65,7 +56,7 @@ fun TerminosCondicionesScreen(navController: NavController) {
                 "Antes de continuar",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E293B)
+                color = Color.White
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -73,7 +64,7 @@ fun TerminosCondicionesScreen(navController: NavController) {
             Text(
                 "Para crear tu cuenta en MONVORA, es necesario que leas y aceptes nuestros términos y condiciones y nuestra política de privacidad.",
                 fontSize = 14.sp,
-                color = Color(0xFF64748B),
+                color = Monvora.LilaClaro,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
@@ -195,9 +186,10 @@ fun TerminosCondicionesScreen(navController: NavController) {
                 onClick = { navController.navigate("aceptarCuenta") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(54.dp),
+                    .height(54.dp)
+                .background(Monvora.DegradadoReportes, RoundedCornerShape(16.dp)),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6366F1))
+                colors = coloresBotonDegradado()
             ) {
                 Text("Continuar con la aceptación", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }

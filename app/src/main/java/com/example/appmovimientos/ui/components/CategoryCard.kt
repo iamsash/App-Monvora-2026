@@ -15,7 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.appmovimientos.data.model.Category
-import com.example.appmovimientos.ui.theme.AppColors
+import com.example.appmovimientos.ui.theme.Monvora
 
 @Composable
 fun CategoryCard(
@@ -28,7 +28,7 @@ fun CategoryCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -47,21 +47,21 @@ fun CategoryCard(
                     text = category.name,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = Color(0xFF2E7D32)
+                    color = Monvora.TextoOscuro
                 )
                 Text(
                     text = category.type,
-                    color = if (category.type == "Ingreso") Color(0xFF4CAF50) else Color(0xFFFF5722),
+                    color = if (category.type == "Ingreso") Monvora.Verde else Monvora.Rojo,
                     fontSize = 14.sp
                 )
             }
 
             Row {
                 IconButton(onClick = onEdit) {
-                    Icon(Icons.Filled.Edit, contentDescription = "Editar", tint = Color(0xFF2196F3))
+                    Icon(Icons.Filled.Edit, contentDescription = "Editar", tint = Monvora.Morado)
                 }
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Eliminar", tint = Color(0xFFE57373))
+                    Icon(Icons.Filled.Delete, contentDescription = "Eliminar", tint = Monvora.Rojo)
                 }
             }
         }
