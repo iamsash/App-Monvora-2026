@@ -1,6 +1,8 @@
 package com.example.appmovimientos.utils
 
+import java.time.Clock
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.format.ResolverStyle
@@ -22,6 +24,15 @@ object DateUtils {
 
     private val formatoDmy: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/uuuu")
     private val formatoIso: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd")
+
+    /** Zona horaria de la app (Perú). La misma que usa la API del asistente. */
+    val ZONA: ZoneId = ZoneId.of("America/Lima")
+
+    /**
+     * Fecha de hoy en Perú. No se usa la zona del teléfono: si está en UTC (como muchos
+     * emuladores), a partir de las 7 p. m. ya marcaría el día siguiente.
+     */
+    fun hoy(reloj: Clock = Clock.system(ZONA)): LocalDate = LocalDate.now(reloj.withZone(ZONA))
 
     /** Convierte la fecha guardada en una fecha real, o null si no es válida. */
     fun parse(fecha: String?): LocalDate? {

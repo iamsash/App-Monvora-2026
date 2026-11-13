@@ -26,7 +26,7 @@ object MovementFilters {
     fun filtrarPorPeriodo(
         movimientos: List<Expense>,
         periodo: String,
-        hoy: LocalDate = LocalDate.now()
+        hoy: LocalDate = DateUtils.hoy()
     ): List<Expense> {
         val mesActual = YearMonth.from(hoy)
         return when (periodo) {

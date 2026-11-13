@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.example.appmovimientos.utils.MovementFilters
-import java.util.Calendar
 
 class ReportsViewModel(
     private val movementRepository: MovementRepository = MovementRepository()
@@ -26,7 +25,7 @@ class ReportsViewModel(
         val selectedPeriod: String = "Todo",
         val selectedTab: String = "Mes",
         val sortOrder: String = "Mayor a menor",
-        val selectedYear: String = Calendar.getInstance().get(Calendar.YEAR).toString(),
+        val selectedYear: String = com.example.appmovimientos.utils.DateUtils.hoy().year.toString(),
         val sortOrderTotal: String = "Mayor a menor",
         val isLoading: Boolean = true,
         val errorMessage: String? = null

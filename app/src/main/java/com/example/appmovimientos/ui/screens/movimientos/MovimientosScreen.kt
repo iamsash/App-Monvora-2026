@@ -34,7 +34,7 @@ import com.example.appmovimientos.data.model.Category
 import com.example.appmovimientos.data.model.Expense
 import com.example.appmovimientos.ui.theme.AppColors
 import kotlinx.coroutines.delay
-import java.util.Calendar
+import com.example.appmovimientos.utils.DateUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,14 +43,12 @@ fun RegistroScreen(
     viewModel: MovimientosViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val calendar = Calendar.getInstance()
-    val diaHoy = calendar.get(Calendar.DAY_OF_MONTH)
-    val mesHoy = calendar.get(Calendar.MONTH) + 1
-    val anioHoy = calendar.get(Calendar.YEAR)
+    // Hoy en Perú, sin depender de la zona horaria configurada en el teléfono
+    val hoy = remember { DateUtils.hoy() }
 
     var monto by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
-    var fecha by remember { mutableStateOf("$diaHoy/$mesHoy/$anioHoy") }
+    var fecha by remember { mutableStateOf(DateUtils.formatParaGuardar(hoy)) }
     var tipo by remember { mutableStateOf("Gasto") }
     var categoriaSeleccionada by remember { mutableStateOf<Category?>(null) }
     var cuentaSeleccionada by remember { mutableStateOf<Account?>(null) }
@@ -86,9 +84,9 @@ fun RegistroScreen(
     val datePickerDialog = DatePickerDialog(
         context,
         { _, year, month, day -> fecha = "$day/${month + 1}/$year" },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
+        hoy.year,
+        hoy.monthValue - 1, // DatePickerDialog cuenta los meses desde 0
+        hoy.dayOfMonth
     )
 
     Scaffold(

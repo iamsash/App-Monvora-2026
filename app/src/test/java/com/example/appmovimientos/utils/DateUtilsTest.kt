@@ -3,9 +3,20 @@ package com.example.appmovimientos.utils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import java.time.Clock
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
 
 class DateUtilsTest {
+
+    @Test
+    fun `hoy usa la hora de Peru aunque el telefono este en UTC`() {
+        // 12/11/2026 22:36 en Lima = 13/11/2026 03:36 en UTC
+        val relojUtc = Clock.fixed(Instant.parse("2026-11-13T03:36:00Z"), ZoneOffset.UTC)
+        assertEquals(LocalDate.of(2026, 11, 12), DateUtils.hoy(relojUtc))
+        assertEquals("12/11/2026", DateUtils.formatParaGuardar(DateUtils.hoy(relojUtc)))
+    }
 
     @Test
     fun `interpreta fechas sin ceros a la izquierda como las guarda la app`() {

@@ -9,7 +9,6 @@ import com.example.appmovimientos.utils.MoneyUtils
 import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 import java.time.LocalDate
-import java.time.ZoneId
 
 /**
  * Registro que el asistente dejó preparado. NO está guardado: la app lo muestra
@@ -148,7 +147,7 @@ class GuardadorFirebase(
                     propuesta,
                     cuentas.getAccountsFlow().first(),
                     categorias.getCategoriesFlow().first(),
-                    LocalDate.now(ZoneId.of("America/Lima"))
+                    DateUtils.hoy()
                 )
                 movimientos.createMovement(expense, cuenta)
             }
