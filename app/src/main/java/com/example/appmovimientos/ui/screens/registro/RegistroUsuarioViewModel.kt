@@ -3,6 +3,7 @@ package com.example.appmovimientos.ui.screens.registro
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appmovimientos.data.repository.AuthRepository
+import com.example.appmovimientos.data.repository.CategoryRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +14,8 @@ import java.util.Date
 import java.util.Locale
 
 class RegistroUsuarioViewModel(
-    private val authRepository: AuthRepository = AuthRepository()
+    private val authRepository: AuthRepository = AuthRepository(),
+    private val categoryRepository: CategoryRepository = CategoryRepository()
 ) : ViewModel() {
 
     var nombre: String = ""
@@ -119,6 +121,7 @@ class RegistroUsuarioViewModel(
                         "aceptacionTerminos" to aceptacionMap
                     )
                     authRepository.saveUserData(uid, userData)
+                    crearCategoriasIniciales()
                     _uiState.update { it.copy(isLoading = false) }
                     onSuccess()
                 } else {
@@ -127,6 +130,15 @@ class RegistroUsuarioViewModel(
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
             }
+        }
+    }
+
+    /** Un usuario nuevo empieza con las categorías más comunes. Si falla, puede agregarlas después. */
+    private suspend fun crearCategoriasIniciales() {
+        try {
+            categoryRepository.crearCategoriasPorDefecto()
+        } catch (e: Exception) {
+            // No se bloquea el registro: en la pantalla Categorías aparecerá "Agregar categorías sugeridas".
         }
     }
 }

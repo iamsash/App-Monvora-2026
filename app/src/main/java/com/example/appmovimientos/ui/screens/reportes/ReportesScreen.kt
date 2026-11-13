@@ -1,5 +1,7 @@
 package com.example.appmovimientos.ui.screens.reportes
 
+import com.example.appmovimientos.data.model.CategoriasCatalogo
+import com.example.appmovimientos.ui.components.IconoEmoji
 import com.example.appmovimientos.data.preferences.AppPreferences
 import com.example.appmovimientos.data.preferences.dinero
 import androidx.compose.foundation.Canvas
@@ -391,14 +393,11 @@ fun ReporteCategoriaScreen(
                                                     verticalAlignment = Alignment.CenterVertically
                                                 ) {
                                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                                        Box(
-                                                            modifier = Modifier
-                                                                .size(36.dp)
-                                                                .background(categoryColors[index % categoryColors.size].copy(alpha = 0.15f), CircleShape),
-                                                            contentAlignment = Alignment.Center
-                                                        ) {
-                                                            Icon(Icons.Filled.Star, contentDescription = null, tint = categoryColors[index % categoryColors.size], modifier = Modifier.size(18.dp))
-                                                        }
+                                                        IconoEmoji(
+                                                            emoji = CategoriasCatalogo.emojiParaNombre(stat.first),
+                                                            tipo = CategoriasCatalogo.GASTO,
+                                                            tamano = 36.dp
+                                                        )
                                                         Spacer(modifier = Modifier.width(10.dp))
                                                         Text(stat.first, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
                                                     }

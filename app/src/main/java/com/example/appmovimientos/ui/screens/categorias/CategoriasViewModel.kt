@@ -2,6 +2,8 @@ package com.example.appmovimientos.ui.screens.categorias
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.appmovimientos.data.model.CategoriaSugerida
+import com.example.appmovimientos.data.model.CategoriasCatalogo
 import com.example.appmovimientos.data.model.Category
 import com.example.appmovimientos.data.repository.CategoryRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -61,12 +63,16 @@ class CategoriasViewModel(
             onError("Por favor ingresa un nombre para la categoría")
             return
         }
+        if (existeNombre(nombre, tipo)) {
+            onError("Ya tienes una categoría de $tipo llamada \"${nombre.trim()}\"")
+            return
+        }
 
         val category = Category(
-            name = nombre,
+            name = nombre.trim(),
             type = tipo,
             icon = icono,
-            color = if (tipo == "Ingreso") "#4CAF50" else "#FF5722"
+            color = CategoriasCatalogo.colorPara(tipo)
         )
 
         viewModelScope.launch {
@@ -91,12 +97,16 @@ class CategoriasViewModel(
             onError("El nombre es obligatorio")
             return
         }
+        if (existeNombre(nombre, tipo, excepto = category.id)) {
+            onError("Ya tienes una categoría de $tipo llamada \"${nombre.trim()}\"")
+            return
+        }
 
         val categoriaActualizada = category.copy(
-            name = nombre,
+            name = nombre.trim(),
             type = tipo,
             icon = icono,
-            color = if (tipo == "Ingreso") "#4CAF50" else "#FF5722"
+            color = CategoriasCatalogo.colorPara(tipo)
         )
 
         viewModelScope.launch {
@@ -106,6 +116,34 @@ class CategoriasViewModel(
             } catch (e: Exception) {
                 onError("Error al actualizar: ${e.message}")
             }
+        }
+    }
+
+    /** Categorías por defecto que el usuario todavía no tiene (para el aviso "Agregar sugeridas"). */
+    fun sugeridasFaltantes(): List<CategoriaSugerida> =
+        CategoriasCatalogo.faltantes(_uiState.value.categorias, CategoriasCatalogo.porDefecto)
+
+    /** Agrega de una vez las categorías por defecto que falten, sin duplicar las que ya tiene. */
+    fun agregarSugeridas(onSuccess: (Int) -> Unit, onError: (String) -> Unit) {
+        val faltantes = sugeridasFaltantes()
+        if (faltantes.isEmpty()) {
+            onSuccess(0)
+            return
+        }
+        viewModelScope.launch {
+            try {
+                categoryRepository.createCategories(faltantes.map { CategoriasCatalogo.aCategoria(it) })
+                onSuccess(faltantes.size)
+            } catch (e: Exception) {
+                onError("No se pudieron agregar las categorías: ${e.message}")
+            }
+        }
+    }
+
+    private fun existeNombre(nombre: String, tipo: String, excepto: String? = null): Boolean {
+        val buscado = CategoriasCatalogo.normalizar(nombre)
+        return _uiState.value.categorias.any {
+            it.id != excepto && it.type == tipo && CategoriasCatalogo.normalizar(it.name) == buscado
         }
     }
 }

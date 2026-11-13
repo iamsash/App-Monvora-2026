@@ -41,6 +41,21 @@ fun CategoriasScreen(
     var filtroSeleccionado by remember { mutableStateOf("Todas") }
 
     val categorias = uiState.categorias
+    val faltantes = viewModel.sugeridasFaltantes()
+    var agregando by remember { mutableStateOf(false) }
+    val agregarSugeridas: () -> Unit = {
+        agregando = true
+        viewModel.agregarSugeridas(
+            onSuccess = { n ->
+                agregando = false
+                Toast.makeText(context, if (n == 1) "Se agregó 1 categoría" else "Se agregaron $n categorías", Toast.LENGTH_SHORT).show()
+            },
+            onError = { err ->
+                agregando = false
+                Toast.makeText(context, err, Toast.LENGTH_LONG).show()
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -149,12 +164,7 @@ fun CategoriasScreen(
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    Icons.Filled.Menu,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(32.dp)
-                                )
+                                Text("🏷️", fontSize = 30.sp)
                             }
                         }
 
@@ -388,6 +398,20 @@ fun CategoriasScreen(
                                     fontWeight = FontWeight.SemiBold
                                 )
                             }
+
+                            if (faltantes.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                OutlinedButton(
+                                    onClick = agregarSugeridas,
+                                    enabled = !agregando,
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.7f)
+                                        .height(50.dp)
+                                ) {
+                                    Text("✨ Agregar categorías sugeridas", color = Color(0xFF6366F1), fontWeight = FontWeight.SemiBold)
+                                }
+                            }
                         }
                     }
                 } else {
@@ -404,6 +428,16 @@ fun CategoriasScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         contentPadding = PaddingValues(bottom = 80.dp)
                     ) {
+                        if (faltantes.isNotEmpty()) {
+                            item {
+                                AvisoSugeridas(
+                                    faltantes = faltantes.size,
+                                    vistaPrevia = faltantes.take(6).joinToString(" ") { it.emoji },
+                                    agregando = agregando,
+                                    onAgregar = agregarSugeridas
+                                )
+                            }
+                        }
                         item {
                             Row(
                                 modifier = Modifier
@@ -585,318 +619,34 @@ fun CategoriasScreen(
     }
 }
 
+/** Aviso para usuarios que aún no tienen las categorías por defecto. */
 @Composable
-fun EditarCategoriaDialog(
-    categoria: Category,
-    onDismiss: () -> Unit,
-    onSave: (Category, String, String, String) -> Unit
-) {
-    var nombre by remember { mutableStateOf(categoria.name) }
-    var tipo by remember { mutableStateOf(categoria.type) }
-    var iconoSeleccionado by remember { mutableStateOf(categoria.icon) }
-    var expandedTipo by remember { mutableStateOf(false) }
-    var expandedIcono by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-
-    val iconos = mapOf(
-        "ShoppingCart" to Icons.Filled.ShoppingCart,
-        "Work" to Icons.Filled.Build,
-        "Home" to Icons.Filled.Home,
-        "Food" to Icons.Filled.Place,
-        "Transport" to Icons.Filled.Face,
-        "Health" to Icons.Filled.Favorite,
-        "Entertainment" to Icons.Filled.FavoriteBorder,
-        "Education" to Icons.Filled.Info,
-        "Salary" to Icons.Filled.Done,
-        "Gift" to Icons.Filled.MailOutline
-    )
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Editar Categoría", fontWeight = FontWeight.Bold) },
-        text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 300.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                OutlinedTextField(
-                    value = nombre,
-                    onValueChange = { nombre = it },
-                    label = { Text("Nombre de la categoría") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                )
-
-                Box {
-                    OutlinedButton(
-                        onClick = { expandedTipo = true },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(
-                            if (tipo == "Ingreso") Icons.Filled.KeyboardArrowUp else Icons.Filled.ArrowDropDown,
-                            contentDescription = null
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(tipo)
-                        Spacer(modifier = Modifier.weight(1f))
-                        Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
-                    }
-                    DropdownMenu(
-                        expanded = expandedTipo,
-                        onDismissRequest = { expandedTipo = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Gasto") },
-                            onClick = {
-                                tipo = "Gasto"
-                                expandedTipo = false
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color.Red)
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Ingreso") },
-                            onClick = {
-                                tipo = "Ingreso"
-                                expandedTipo = false
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null, tint = Color.Green)
-                            }
-                        )
-                    }
-                }
-
-                Box {
-                    OutlinedButton(
-                        onClick = { expandedIcono = true },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(
-                            iconos[iconoSeleccionado] ?: Icons.Filled.Menu,
-                            contentDescription = null
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(iconoSeleccionado)
-                        Spacer(modifier = Modifier.weight(1f))
-                        Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
-                    }
-                    DropdownMenu(
-                        expanded = expandedIcono,
-                        onDismissRequest = { expandedIcono = false }
-                    ) {
-                        iconos.forEach { (key, icon) ->
-                            DropdownMenuItem(
-                                text = { Text(key) },
-                                onClick = {
-                                    iconoSeleccionado = key
-                                    expandedIcono = false
-                                },
-                                leadingIcon = { Icon(icon, contentDescription = null) }
-                            )
-                        }
-                    }
-                }
-
-                errorMessage?.let {
-                    Text(it, color = Color.Red, fontSize = 14.sp)
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    if (nombre.isBlank()) {
-                        errorMessage = "El nombre es obligatorio"
-                    } else {
-                        onSave(categoria, nombre, tipo, iconoSeleccionado)
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Guardar Cambios")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Cancelar")
-            }
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun NuevaCategoriaScreen(
-    navController: NavController,
-    viewModel: CategoriasViewModel = viewModel()
-) {
-    val context = LocalContext.current
-
-    var nombre by remember { mutableStateOf("") }
-    var tipo by remember { mutableStateOf("Gasto") }
-    var iconoSeleccionado by remember { mutableStateOf("ShoppingCart") }
-    var expandedTipo by remember { mutableStateOf(false) }
-    var expandedIcono by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-
-    val iconos = mapOf(
-        "ShoppingCart" to Icons.Filled.ShoppingCart,
-        "Work" to Icons.Filled.Build,
-        "Home" to Icons.Filled.Home,
-        "Food" to Icons.Filled.Place,
-        "Transport" to Icons.Filled.Face,
-        "Health" to Icons.Filled.Favorite,
-        "Entertainment" to Icons.Filled.FavoriteBorder,
-        "Education" to Icons.Filled.Info,
-        "Salary" to Icons.Filled.Done,
-        "Gift" to Icons.Filled.MailOutline
-    )
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Nueva Categoría", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(20.dp),
-            verticalArrangement = Arrangement.Center
+private fun AvisoSugeridas(faltantes: Int, vistaPrevia: String, agregando: Boolean, onAgregar: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE9FE))
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Categorías sugeridas", fontWeight = FontWeight.Bold, color = Color(0xFF4C1D95))
+                Text(
+                    if (faltantes == 1) "Te falta 1 categoría común" else "Te faltan $faltantes categorías comunes",
+                    fontSize = 13.sp,
+                    color = Color(0xFF6D28D9)
+                )
+                Text(vistaPrevia, fontSize = 18.sp, modifier = Modifier.padding(top = 4.dp))
+            }
+            Button(
+                onClick = onAgregar,
+                enabled = !agregando,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6366F1)),
+                shape = RoundedCornerShape(10.dp)
             ) {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Text(
-                        "Crear Nueva Categoría",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    OutlinedTextField(
-                        value = nombre,
-                        onValueChange = { nombre = it },
-                        label = { Text("Nombre de la categoría") },
-                        leadingIcon = { Icon(Icons.Filled.Menu, contentDescription = null) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Box {
-                        OutlinedButton(
-                            onClick = { expandedTipo = true },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Icon(
-                                if (tipo == "Ingreso") Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowUp,
-                                contentDescription = null
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(tipo)
-                            Spacer(modifier = Modifier.weight(1f))
-                            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
-                        }
-                        DropdownMenu(
-                            expanded = expandedTipo,
-                            onDismissRequest = { expandedTipo = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("Gasto") },
-                                onClick = { tipo = "Gasto"; expandedTipo = false },
-                                leadingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Ingreso") },
-                                onClick = { tipo = "Ingreso"; expandedTipo = false },
-                                leadingIcon = { Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null) }
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Box {
-                        OutlinedButton(
-                            onClick = { expandedIcono = true },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Icon(
-                                iconos[iconoSeleccionado] ?: Icons.Filled.Menu,
-                                contentDescription = null
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Seleccionar icono")
-                            Spacer(modifier = Modifier.weight(1f))
-                            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
-                        }
-                        DropdownMenu(
-                            expanded = expandedIcono,
-                            onDismissRequest = { expandedIcono = false }
-                        ) {
-                            iconos.forEach { (key, icon) ->
-                                DropdownMenuItem(
-                                    text = { Text(key) },
-                                    onClick = { iconoSeleccionado = key; expandedIcono = false },
-                                    leadingIcon = { Icon(icon, contentDescription = null) }
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(
-                        onClick = {
-                            viewModel.createCategory(
-                                nombre = nombre,
-                                tipo = tipo,
-                                icono = iconoSeleccionado,
-                                onSuccess = {
-                                    Toast.makeText(context, "Categoría creada exitosamente", Toast.LENGTH_SHORT).show()
-                                    navController.popBackStack()
-                                },
-                                onError = { err ->
-                                    errorMessage = err
-                                }
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        enabled = nombre.isNotBlank()
-                    ) {
-                        Text("Crear Categoría", fontSize = 16.sp)
-                    }
-
-                    errorMessage?.let {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(it, color = Color.Red, fontSize = 14.sp)
-                    }
-                }
+                Text(if (agregando) "Agregando…" else "Agregar")
             }
         }
     }

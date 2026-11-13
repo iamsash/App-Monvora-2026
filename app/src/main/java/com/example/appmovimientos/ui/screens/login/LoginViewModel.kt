@@ -10,6 +10,7 @@ import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appmovimientos.data.repository.AuthRepository
+import com.example.appmovimientos.data.repository.CategoryRepository
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
@@ -24,7 +25,8 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(
 
-    private val authRepository: AuthRepository = AuthRepository()
+    private val authRepository: AuthRepository = AuthRepository(),
+    private val categoryRepository: CategoryRepository = CategoryRepository()
 ) : ViewModel() {
 
     var correo: String = ""
@@ -148,6 +150,12 @@ class LoginViewModel(
                                     "usuario" to (googleIdTokenCredential.id?.substringBefore("@") ?: "google_user")
                                 )
                                 authRepository.saveUserData(uid, userData)
+                                // Usuario nuevo con Google: empieza con las categorías más comunes
+                                try {
+                                    categoryRepository.crearCategoriasPorDefecto()
+                                } catch (e: Exception) {
+                                    // No bloquea el inicio de sesión; puede agregarlas después
+                                }
                             }
                         }
 

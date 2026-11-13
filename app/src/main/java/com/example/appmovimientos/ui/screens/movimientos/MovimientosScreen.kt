@@ -1,5 +1,6 @@
 package com.example.appmovimientos.ui.screens.movimientos
 
+import com.example.appmovimientos.ui.components.IconoCategoria
 import com.example.appmovimientos.data.preferences.dinero
 import com.example.appmovimientos.data.preferences.simboloMoneda
 import com.example.appmovimientos.data.preferences.fechaVisible
@@ -187,10 +188,7 @@ fun RegistroScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
-                                Icon(
-                                    Icons.Filled.Menu,
-                                    contentDescription = null
-                                )
+                                IconoCategoria(categoriaSeleccionada, tamano = 28.dp)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(categoriaSeleccionada?.name ?: "Seleccionar categoría")
                                 Spacer(modifier = Modifier.weight(1f))
@@ -208,19 +206,7 @@ fun RegistroScreen(
                                             categoriaSeleccionada = categoria
                                             expandedCategoria = false
                                         },
-                                        leadingIcon = {
-                                            Icon(
-                                                when (categoria.icon) {
-                                                    "Work" -> Icons.Filled.Build
-                                                    "Home" -> Icons.Filled.Home
-                                                    "Food" -> Icons.Filled.Place
-                                                    "Transport" -> Icons.Filled.Face
-                                                    "Health" -> Icons.Filled.Favorite
-                                                    else -> Icons.Filled.Menu
-                                                },
-                                                contentDescription = null
-                                            )
-                                        }
+                                        leadingIcon = { IconoCategoria(categoria, tamano = 28.dp) }
                                     )
                                 }
                             }

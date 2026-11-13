@@ -1,5 +1,6 @@
 package com.example.appmovimientos.data.repository
 
+import com.example.appmovimientos.data.model.CategoriasCatalogo
 import com.example.appmovimientos.data.model.Category
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -60,5 +61,29 @@ class CategoryRepository {
     suspend fun deleteCategory(categoryId: String) {
         val uid = getUid() ?: throw IllegalStateException("Usuario no autenticado")
         database.child("users").child(uid).child("categorias").child(categoryId).removeValue().await()
+    }
+
+    /** Crea varias categorías en una sola escritura (todas o ninguna). */
+    suspend fun createCategories(categories: List<Category>) {
+        if (categories.isEmpty()) return
+        val uid = getUid() ?: throw IllegalStateException("Usuario no autenticado")
+        val ref = database.child("users").child(uid).child("categorias")
+        val cambios = HashMap<String, Any>()
+        for (category in categories) {
+            val id = ref.push().key ?: throw IllegalStateException("No se pudo generar el ID de la categoría")
+            cambios[id] = mapOf(
+                "id" to id,
+                "name" to category.name,
+                "type" to category.type,
+                "icon" to category.icon,
+                "color" to category.color
+            )
+        }
+        ref.updateChildren(cambios).await()
+    }
+
+    /** Categorías iniciales de un usuario nuevo (las "por defecto" del catálogo). */
+    suspend fun crearCategoriasPorDefecto() {
+        createCategories(CategoriasCatalogo.porDefecto.map { CategoriasCatalogo.aCategoria(it) })
     }
 }

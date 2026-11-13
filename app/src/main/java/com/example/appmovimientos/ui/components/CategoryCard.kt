@@ -38,29 +38,7 @@ fun CategoryCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(50.dp)
-                    .background(
-                        if (category.type == "Ingreso") AppColors.IncomeGradient else AppColors.ExpenseGradient,
-                        CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = when (category.icon) {
-                        "Work" -> Icons.Filled.Build
-                        "Home" -> Icons.Filled.Home
-                        "Food" -> Icons.Filled.Place
-                        "Transport" -> Icons.Filled.Face
-                        "Health" -> Icons.Filled.Favorite
-                        else -> Icons.Filled.Menu
-                    },
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+            IconoCategoria(category, tamano = 50.dp)
 
             Spacer(modifier = Modifier.width(16.dp))
 

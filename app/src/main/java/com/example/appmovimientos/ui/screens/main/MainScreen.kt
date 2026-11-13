@@ -1,5 +1,6 @@
 package com.example.appmovimientos.ui.screens.main
 
+import com.example.appmovimientos.ui.components.IconoCategoria
 import com.example.appmovimientos.data.preferences.dinero
 import com.example.appmovimientos.data.preferences.fechaVisible
 import android.widget.Toast
@@ -407,26 +408,7 @@ fun MainScreen(
                                                 .padding(vertical = 8.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(40.dp)
-                                                    .background(Color(0xFFF1F5F9), CircleShape),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    when (categoria?.icon) {
-                                                        "Work" -> Icons.Filled.Build
-                                                        "Home" -> Icons.Filled.Home
-                                                        "Food" -> Icons.Filled.Place
-                                                        "Transport" -> Icons.Filled.Face
-                                                        "Health" -> Icons.Filled.Favorite
-                                                        else -> Icons.Filled.Menu
-                                                    },
-                                                    contentDescription = null,
-                                                    tint = Color(0xFFEF4444),
-                                                    modifier = Modifier.size(20.dp)
-                                                )
-                                            }
+                                            IconoCategoria(categoria, tamano = 40.dp)
                                             Spacer(modifier = Modifier.width(12.dp))
 
                                             Column(modifier = Modifier.weight(1f)) {
