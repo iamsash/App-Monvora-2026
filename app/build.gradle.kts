@@ -5,6 +5,9 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+// URL pública de la API del asistente (MONVORA.Asistente.Api) en Azure App Service
+val asistenteApiAzure = "https://monvora-asistente-api-ducgg3effzhkhnbe.brazilsouth-01.azurewebsites.net/"
+
 android {
     namespace = "com.example.appmovimientos"
     compileSdk = 36
@@ -26,13 +29,22 @@ android {
             buildConfigField("String", "ASISTENTE_API_URL", "\"http://10.0.2.2:5080/\"")
         }
         release {
-            // Cambiar por la URL pública (HTTPS) cuando la API se publique, por ejemplo en Azure
-            buildConfigField("String", "ASISTENTE_API_URL", "\"https://CAMBIAR-URL-DE-LA-API/\"")
+            // API del asistente publicada en Azure (HTTPS)
+            buildConfigField("String", "ASISTENTE_API_URL", "\"$asistenteApiAzure\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        // Versión para que los compañeros prueben la app en sus celulares:
+        // igual que debug (instalable sin configurar firmas), pero usa la API de Azure por HTTPS.
+        // Usa la configuración de red de src/main, que solo permite HTTPS.
+        create("demo") {
+            initWith(getByName("debug"))
+            buildConfigField("String", "ASISTENTE_API_URL", "\"$asistenteApiAzure\"")
+            versionNameSuffix = "-demo"
+            matchingFallbacks += listOf("debug")
         }
     }
     compileOptions {
